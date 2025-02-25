@@ -1,0 +1,129 @@
+﻿@startuml
+
+' ---------------------------
+' Alapos osztályok definiálása
+' ---------------------------
+
+' IdentityUser - placeholder, mivel az ApplicationUser ezt örökli
+class IdentityUser
+
+class ApplicationUser {
+  - PlayerName : string
+  - PlayerLevel : int
+  - TotalScore : int
+  - CreatedAt : DateTime
+  - IsActive : bool
+}
+ApplicationUser -|> IdentityUser
+
+class Character {
+  - CharacterId : int
+  - AstroSign : string
+  - Gender : string
+}
+
+class Inventory {
+  - InventoryId : int
+  - PlayerId : int
+  - TimePoint : int
+}
+
+class InventoryMaterial {
+  - Id : int
+  - InventoryId : int
+  - MaterialId : int
+  - Quantity : int
+}
+
+class Island {
+  - IslandId : int
+  - IslandName : string
+  - Element : string
+}
+
+class LoginModel {
+  - Email : string
+  - Password : string
+}
+
+class Material {
+  - MaterialId : int
+  - WitchName : string
+  - EnglishName : string
+  - LatinName : string
+}
+
+class Player {
+  - PlayerId : int
+  - PlayerName : string
+  - UserId : string
+  - CharacterId : int
+  - IslandId : int
+  - TotalScore : int
+  - LastLogin : DateTime?
+  - CreatedAt : DateTime
+  - IsActive : bool
+}
+
+class RecipeBook {
+  - RecipeId : int
+  - RecipeName : string
+  - MatId : int
+  - Quantity : int
+}
+
+' ---------------------------
+' Kapcsolatok beállítása
+' ---------------------------
+
+' Inventory "belongs to" Player (a PlayerId alapján)
+Inventory --> Player : belongs to
+
+' Inventory tartalmaz több InventoryMaterial-t
+Inventory "1" -- "0..*" InventoryMaterial : contains
+
+' InventoryMaterial kapcsolódik az Inventory-hez
+InventoryMaterial --> Inventory : belongs to
+
+' InventoryMaterial hivatkozik a Material-re
+InventoryMaterial --> Material : references
+
+' Island-nek több Player-je van
+Island "1" -- "0..*" Player : has
+
+' Player kapcsolódik az ApplicationUser-hez
+Player --> ApplicationUser : belongs to
+
+' Player rendelkezik egy Character-rel
+Player --> Character : has
+
+' (Már jelöltük az Island kapcsolatot a Player-rel, ezért ezt opcionálisan is meg lehet jelölni)
+Player --> Island : belongs to
+
+' RecipeBook hivatkozik a Material-re (MatId alapján)
+RecipeBook --> Material : references
+
+' ---------------------------
+' ApplicationDbContext osztály (DbSet-ekkel)
+' ---------------------------
+
+class ApplicationDbContext {
+  + Players : DbSet<Player>
+  + Inventories : DbSet<Inventory>
+  + InventoryMaterials : DbSet<InventoryMaterial>
+  + Characters : DbSet<Character>
+  + Materials : DbSet<Material>
+  + RecipeBooks : DbSet<RecipeBook>
+  + Islands : DbSet<Island>
+}
+
+' A context "has" a domain entitásokat (lágy függőségek)
+ApplicationDbContext ..> Player
+ApplicationDbContext ..> Inventory
+ApplicationDbContext ..> InventoryMaterial
+ApplicationDbContext ..> Character
+ApplicationDbContext ..> Material
+ApplicationDbContext ..> RecipeBook
+ApplicationDbContext ..> Island
+
+@enduml
