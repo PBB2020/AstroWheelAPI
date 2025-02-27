@@ -72,6 +72,14 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var sql = dbContext.Database.GenerateCreateScript();
+    Console.WriteLine("Generated SQL script:");
+    Console.WriteLine(sql);
+}
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseCors("AllowAll");

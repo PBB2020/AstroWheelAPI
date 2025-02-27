@@ -29,6 +29,10 @@ namespace AstroWheelAPI.Models
         [ForeignKey("Inventory")]
         public int InventoryId { get; set; }
         public Inventory? Inventory { get; set; }
+        [Required]
+        [ForeignKey("RecipeBook")]
+        public int RecipeBookId { get; set; }
+        public RecipeBook? RecipeBook { get; set; }
         public DateTime? LastLogin { get; set; }
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

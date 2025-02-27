@@ -12,7 +12,6 @@ class ApplicationUser {
   - PlayerLevel : int
   - TotalScore : int
   - CreatedAt : DateTime
-  - IsActive : bool
 }
 ApplicationUser -|> IdentityUser
 
@@ -24,15 +23,31 @@ class Character {
 
 class Inventory {
   - InventoryId : int
-  - PlayerId : int
-  - TimePoint : int
-}
-
-class InventoryMaterial {
-  - Id : int
-  - InventoryId : int
-  - MaterialId : int
-  - Quantity : int
+  - TotalScore : int
+  - Material01 : int
+  - Material02 : int
+  - Material03 : int
+  - Material04 : int
+  - Material05 : int
+  - Material06 : int
+  - Material07 : int
+  - Material08 : int
+  - Material09 : int
+  - Material10 : int
+  - Material11 : int
+  - Material12 : int
+  - Material13 : int
+  - Material14 : int
+  - Material15 : int
+  - Material16 : int
+  - Material17 : int
+  - Material18 : int
+  - Material19 : int
+  - Material20 : int
+  - Material21 : int
+  - Material22 : int
+  - Material23 : int
+  - Material24 : int
 }
 
 class Island {
@@ -47,7 +62,7 @@ class LoginModel {
 }
 
 class Material {
-  - MaterialId : int
+  - MaterialId : string
   - WitchName : string
   - EnglishName : string
   - LatinName : string
@@ -59,17 +74,15 @@ class Player {
   - UserId : string
   - CharacterId : int
   - IslandId : int
-  - TotalScore : int
+  - InventoryId : int
   - LastLogin : DateTime?
   - CreatedAt : DateTime
-  - IsActive : bool
 }
 
 class RecipeBook {
   - RecipeId : int
   - RecipeName : string
-  - MatId : int
-  - Quantity : int
+  - Acquired : string
 }
 
 ' ---------------------------
@@ -78,15 +91,6 @@ class RecipeBook {
 
 ' Inventory "belongs to" Player (a PlayerId alapján)
 Inventory --> Player : belongs to
-
-' Inventory tartalmaz több InventoryMaterial-t
-Inventory "1" -- "0..*" InventoryMaterial : contains
-
-' InventoryMaterial kapcsolódik az Inventory-hez
-InventoryMaterial --> Inventory : belongs to
-
-' InventoryMaterial hivatkozik a Material-re
-InventoryMaterial --> Material : references
 
 ' Island-nek több Player-je van
 Island "1" -- "0..*" Player : has
@@ -110,7 +114,6 @@ RecipeBook --> Material : references
 class ApplicationDbContext {
   + Players : DbSet<Player>
   + Inventories : DbSet<Inventory>
-  + InventoryMaterials : DbSet<InventoryMaterial>
   + Characters : DbSet<Character>
   + Materials : DbSet<Material>
   + RecipeBooks : DbSet<RecipeBook>
@@ -120,7 +123,6 @@ class ApplicationDbContext {
 ' A context "has" a domain entitásokat (lágy függőségek)
 ApplicationDbContext ..> Player
 ApplicationDbContext ..> Inventory
-ApplicationDbContext ..> InventoryMaterial
 ApplicationDbContext ..> Character
 ApplicationDbContext ..> Material
 ApplicationDbContext ..> RecipeBook

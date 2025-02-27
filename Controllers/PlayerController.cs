@@ -24,6 +24,7 @@ namespace AstroWheelAPI.Controllers
                 .Include(p => p.Character)
                 .Include(p => p.Island)
                 .Include(p => p.Inventory)// Inventory betöltése
+                .Include(p => p.RecipeBook)
                 .Select(p => new DTOs.PlayerDTO
                 {
                     PlayerId = p.PlayerId,
@@ -36,7 +37,8 @@ namespace AstroWheelAPI.Controllers
                     LastLogin = p.LastLogin,
                     CreatedAt = p.CreatedAt,
                     CharacterName = p.Character != null ? p.Character.AstroSign : null,// A karakter neve az Astro_sign mezőből jön
-                    IslandName = p.Island != null ? p.Island.IslandName : null// A sziget neve az Island táblából jön
+                    IslandName = p.Island != null ? p.Island.IslandName : null,// A sziget neve az Island táblából jön
+                    RecipeBookId = p.RecipeBookId
                 })
                 .ToListAsync();
 
@@ -50,6 +52,7 @@ namespace AstroWheelAPI.Controllers
                 .Include(p => p.Character)
                 .Include(p => p.Island)
                 .Include(p => p.Inventory)
+                .Include(p => p.RecipeBook)
                 .Where(p => p.PlayerId == id)
                 .Select(p => new PlayerDTO
                 {
@@ -63,7 +66,8 @@ namespace AstroWheelAPI.Controllers
                     LastLogin = p.LastLogin,
                     CreatedAt = p.CreatedAt,
                     CharacterName = p.Character != null ? p.Character.AstroSign : null,
-                    IslandName = p.Island != null ? p.Island.IslandName : null
+                    IslandName = p.Island != null ? p.Island.IslandName : null,
+                    RecipeBookId = p.RecipeBookId
                 })
                 .FirstOrDefaultAsync();
 
