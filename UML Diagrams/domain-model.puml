@@ -4,16 +4,23 @@
 ' Alapos osztályok definiálása
 ' ---------------------------
 
-' IdentityUser - placeholder, mivel az ApplicationUser ezt örökli
-class IdentityUser
-
 class ApplicationUser {
-  - PlayerName : string
-  - PlayerLevel : int
-  - TotalScore : int
-  - CreatedAt : DateTime
+	- Id : string
+	- UserName : string
+	- NormalizedUserName : string
+	- Email : string
+	- NormalizedEmail : string
+	- EmailConfirmed : bool
+	- PasswordHash : string
+	- SecurityStamp : string
+	- ConcurrencyStamp : string
+	- PhoneNumber : string
+	- PhoneNumberConfirmed : bool
+	- TwoFactorEnabled : bool
+	- LockoutEnd : DateTime?
+	- LockoutEnabled : bool
+	- AccesFailedCount : int
 }
-ApplicationUser -|> IdentityUser
 
 class Character {
   - CharacterId : int
@@ -75,6 +82,7 @@ class Player {
   - CharacterId : int
   - IslandId : int
   - InventoryId : int
+  - RecipeBookId : int
   - LastLogin : DateTime?
   - CreatedAt : DateTime
 }
@@ -90,22 +98,25 @@ class RecipeBook {
 ' ---------------------------
 
 ' Inventory "belongs to" Player (a PlayerId alapján)
-Inventory --> Player : belongs to
+Inventory "1" -- "1" Player : belongs to.
 
 ' Island-nek több Player-je van
 Island "1" -- "0..*" Player : has
 
 ' Player kapcsolódik az ApplicationUser-hez
-Player --> ApplicationUser : belongs to
+Player "1" -- "1" ApplicationUser : belongs to
 
 ' Player rendelkezik egy Character-rel
-Player --> Character : has
+Player "1" -- "1" Character : has
+
+' Player rendelkezik egy RecipeBook-kal
+Player "1" -- "1" RecipeBook : has
 
 ' (Már jelöltük az Island kapcsolatot a Player-rel, ezért ezt opcionálisan is meg lehet jelölni)
-Player --> Island : belongs to
+Player "1" -- "1" Island : belongs to
 
 ' RecipeBook hivatkozik a Material-re (MatId alapján)
-RecipeBook --> Material : references
+RecipeBook "1" -- "0..*" Material : references.
 
 ' ---------------------------
 ' ApplicationDbContext osztály (DbSet-ekkel)
