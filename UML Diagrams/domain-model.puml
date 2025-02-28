@@ -22,6 +22,48 @@ class ApplicationUser {
 	- AccesFailedCount : int
 }
 
+class AspNetRole {
+  - Id : string
+  - Name : string
+  - NormalizedName : string
+  - ConcurrencyStamp : string
+}
+
+class AspNetUserRole {
+  - UserId : string
+  - RoleId : string
+}
+
+class AspNetUserClaim {
+  - Id : int
+  - UserId : string
+  - ClaimType : string
+  - ClaimValue : string
+}
+
+class AspNetUserLogin {
+  - LoginProvider : string
+  - ProviderKey : string
+  - ProviderDisplayName : string
+  - UserId : string
+}
+
+class AspNetUserToken {
+  - UserId : string
+  - LoginProvider : string
+  - Name : string
+  - Value : string
+}
+
+class LoginModel {
+  - Email : string
+  - Password : string
+}
+
+' ---------------------------
+' Egyéb osztályok
+' ---------------------------
+
 class Character {
   - CharacterId : int
   - AstroSign : string
@@ -61,11 +103,6 @@ class Island {
   - IslandId : int
   - IslandName : string
   - Element : string
-}
-
-class LoginModel {
-  - Email : string
-  - Password : string
 }
 
 class Material {
@@ -115,25 +152,47 @@ Player "1" -- "1" RecipeBook : has
 ' (Már jelöltük az Island kapcsolatot a Player-rel, ezért ezt opcionálisan is meg lehet jelölni)
 Player "1" -- "1" Island : belongs to
 
+' ASP.NET Identity kapcsolatok
+ApplicationUser "1" -- "0..*" AspNetUserRole : assigned
+AspNetRole "1" -- "0..*" AspNetUserRole : contains
+ApplicationUser "1" -- "0..*" AspNetUserClaim : has
+ApplicationUser "1" -- "0..*" AspNetUserLogin : authenticated by
+ApplicationUser "1" -- "0..*" AspNetUserToken : holds token
+
+' LoginModel az API-ban csak egy adatszerkezet
+LoginModel ..> ApplicationUser : "used for authentication"
+
 ' ---------------------------
 ' ApplicationDbContext osztály (DbSet-ekkel)
 ' ---------------------------
 
 class ApplicationDbContext {
+  + Users : DbSet<ApplicationUser>
   + Players : DbSet<Player>
   + Inventories : DbSet<Inventory>
   + Characters : DbSet<Character>
   + Materials : DbSet<Material>
   + RecipeBooks : DbSet<RecipeBook>
   + Islands : DbSet<Island>
+  + Roles : DbSet<AspNetRole>
+  + UserRoles : DbSet<AspNetUserRole>
+  + UserClaims : DbSet<AspNetUserClaim>
+  + UserLogins : DbSet<AspNetUserLogin>
+  + UserTokens : DbSet<AspNetUserToken>
 }
 
 ' A context "has" a domain entitásokat (lágy függőségek)
+ApplicationDbContext ..> ApplicationUser
 ApplicationDbContext ..> Player
 ApplicationDbContext ..> Inventory
 ApplicationDbContext ..> Character
 ApplicationDbContext ..> Material
 ApplicationDbContext ..> RecipeBook
 ApplicationDbContext ..> Island
+ApplicationDbContext ..> AspNetRole
+ApplicationDbContext ..> AspNetUserRole
+ApplicationDbContext ..> AspNetUserClaim
+ApplicationDbContext ..> AspNetUserLogin
+ApplicationDbContext ..> AspNetUserToken
 
 @enduml
