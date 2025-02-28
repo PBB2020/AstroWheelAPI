@@ -115,9 +115,6 @@ Player "1" -- "1" RecipeBook : has
 ' (Már jelöltük az Island kapcsolatot a Player-rel, ezért ezt opcionálisan is meg lehet jelölni)
 Player "1" -- "1" Island : belongs to
 
-' RecipeBook hivatkozik a Material-re (MatId alapján)
-RecipeBook "1" -- "0..*" Material : references.
-
 ' ---------------------------
 ' ApplicationDbContext osztály (DbSet-ekkel)
 ' ---------------------------
