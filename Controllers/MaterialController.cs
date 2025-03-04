@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AstroWheelAPI.Context;
+using AstroWheelAPI.DTOs;
 
 namespace AstroWheelAPI.Controllers
 {
@@ -17,13 +18,26 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Material>>> GetMaterials()
+        public async Task<ActionResult<IEnumerable<object>>> GetMaterialWithQuantity()
         {
-            return await _context.Materials.ToListAsync();
+            var materials = await _context.Materials
+                .Select(m => new
+                {
+                    m.MaterialId,
+                    m.WitchName,
+                    m.EnglishName,
+                    m.LatinName,
+                    Quantity = _context.InventoryMaterials
+                        .Where(im => im.MaterialId == m.MaterialId)
+                        .Sum(im => im.Quantity)
+                })
+                .ToListAsync();
+
+            return materials;
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Material>> GetMaterial(string id)
+        public async Task<ActionResult<object>> GetMaterialWithQuantity(int id)
         {
             var material = await _context.Materials.FindAsync(id);
 
@@ -32,7 +46,18 @@ namespace AstroWheelAPI.Controllers
                 return NotFound();
             }
 
-            return material;
+            var materialWithQuantity = new
+            {
+                material.MaterialId,
+                material.WitchName,
+                material.EnglishName,
+                material.LatinName,
+                Quantity = _context.InventoryMaterials
+                    .Where(im => im.MaterialId == material.MaterialId)
+                    .Sum(im => im.Quantity)
+            };
+
+            return materialWithQuantity;
         }
 
         [HttpPost]
@@ -45,7 +70,7 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult>PutMaterial(string id, Material material)
+        public async Task<IActionResult>PutMaterial(int id, Material material)
         {
             if (id != material.MaterialId)
             {
@@ -74,7 +99,7 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMaterial(string id)
+        public async Task<IActionResult> DeleteMaterial(int id)
         {
             var material = await _context.Materials.FindAsync(id);
             if (material == null)
@@ -88,7 +113,7 @@ namespace AstroWheelAPI.Controllers
             return NoContent();
         }
 
-        private bool MaterialExists( string id)
+        private bool MaterialExists( int id)
         {
             return _context.Materials.Any(e => e.MaterialId == id);
         }

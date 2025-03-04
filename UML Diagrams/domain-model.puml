@@ -20,6 +20,10 @@ class ApplicationUser {
 	- LockoutEnd : DateTime?
 	- LockoutEnabled : bool
 	- AccesFailedCount : int
+	+ PlayerName : string
+	+ PlayerLevel :	int
+	+ TotalScore : int
+	+ CreatedAt : DataTime
 }
 
 class AspNetRole {
@@ -60,6 +64,12 @@ class LoginModel {
   - Password : string
 }
 
+class RegisterModel {
+    - UserName : string
+    - Email : string
+    - Password : string
+}
+
 ' ---------------------------
 ' Egyéb osztályok
 ' ---------------------------
@@ -73,30 +83,12 @@ class Character {
 class Inventory {
   - InventoryId : int
   - TotalScore : int
-  - Material01 : int
-  - Material02 : int
-  - Material03 : int
-  - Material04 : int
-  - Material05 : int
-  - Material06 : int
-  - Material07 : int
-  - Material08 : int
-  - Material09 : int
-  - Material10 : int
-  - Material11 : int
-  - Material12 : int
-  - Material13 : int
-  - Material14 : int
-  - Material15 : int
-  - Material16 : int
-  - Material17 : int
-  - Material18 : int
-  - Material19 : int
-  - Material20 : int
-  - Material21 : int
-  - Material22 : int
-  - Material23 : int
-  - Material24 : int
+}
+
+class InventoryMaterial {
+  - InventoryId : int
+  - MaterialId : int
+  - Quantity : int
 }
 
 class Island {
@@ -106,7 +98,7 @@ class Island {
 }
 
 class Material {
-  - MaterialId : string
+  - MaterialId : int
   - WitchName : string
   - EnglishName : string
   - LatinName : string
@@ -134,23 +126,14 @@ class RecipeBook {
 ' Kapcsolatok beállítása
 ' ---------------------------
 
-' Inventory "belongs to" Player (a PlayerId alapján)
-Inventory "1" -- "1" Player : belongs to.
-
-' Island-nek több Player-je van
-Island "1" -- "0..*" Player : has
-
-' Player kapcsolódik az ApplicationUser-hez
-Player "1" -- "1" ApplicationUser : belongs to
-
-' Player rendelkezik egy Character-rel
-Player "1" -- "1" Character : has
-
-' Player rendelkezik egy RecipeBook-kal
-Player "1" -- "1" RecipeBook : has
-
-' (Már jelöltük az Island kapcsolatot a Player-rel, ezért ezt opcionálisan is meg lehet jelölni)
-Player "1" -- "1" Island : belongs to
+ApplicationUser "1" -- "0..*" Player : has
+Player "1" -- "1" Character : uses
+Player "1" -- "1" Island : located on
+Player "1" -- "1" Inventory : owns
+Player "1" -- "1" RecipeBook : possesses
+Island "1" -- "0..*" Player : contains
+Inventory "1" -- "0..*" InventoryMaterial : contains
+Material "1" -- "0..*" InventoryMaterial : referenced in
 
 ' ASP.NET Identity kapcsolatok
 ApplicationUser "1" -- "0..*" AspNetUserRole : assigned
@@ -158,9 +141,6 @@ AspNetRole "1" -- "0..*" AspNetUserRole : contains
 ApplicationUser "1" -- "0..*" AspNetUserClaim : has
 ApplicationUser "1" -- "0..*" AspNetUserLogin : authenticated by
 ApplicationUser "1" -- "0..*" AspNetUserToken : holds token
-
-' LoginModel az API-ban csak egy adatszerkezet
-LoginModel ..> ApplicationUser : "used for authentication"
 
 ' ---------------------------
 ' ApplicationDbContext osztály (DbSet-ekkel)
@@ -174,6 +154,7 @@ class ApplicationDbContext {
   + Materials : DbSet<Material>
   + RecipeBooks : DbSet<RecipeBook>
   + Islands : DbSet<Island>
+  + InventoryMaterials : DbSet<InventoryMaterial>
   + Roles : DbSet<AspNetRole>
   + UserRoles : DbSet<AspNetUserRole>
   + UserClaims : DbSet<AspNetUserClaim>
@@ -185,6 +166,7 @@ class ApplicationDbContext {
 ApplicationDbContext ..> ApplicationUser
 ApplicationDbContext ..> Player
 ApplicationDbContext ..> Inventory
+ApplicationDbContext ..> InventoryMaterial
 ApplicationDbContext ..> Character
 ApplicationDbContext ..> Material
 ApplicationDbContext ..> RecipeBook

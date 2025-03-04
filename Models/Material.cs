@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace AstroWheelAPI.Models
 {
@@ -7,7 +8,7 @@ namespace AstroWheelAPI.Models
     public class Material
     {
         [Key]
-        public string MaterialId { get; set; } = string.Empty;
+        public int MaterialId { get; set; } 
         [Required]
         [StringLength(100)]
         public string WitchName { get; set; } = string.Empty;
@@ -17,5 +18,7 @@ namespace AstroWheelAPI.Models
         [Required]
         [StringLength(150)]
         public string LatinName { get; set; } = string.Empty;
+        [JsonIgnore]
+        public ICollection<InventoryMaterial> InventoryMaterials { get; set; } = new List<InventoryMaterial>();
     }
 }

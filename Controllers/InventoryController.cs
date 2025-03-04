@@ -20,6 +20,8 @@ namespace AstroWheelAPI.Controllers
         public async Task<ActionResult<IEnumerable<Inventory>>> GetInventories()
         {
             return await _context.Inventories
+                .Include(i => i.InventoryMaterials)
+                .ThenInclude(im => im.Material)
                 .ToListAsync();
         }
 
@@ -27,6 +29,8 @@ namespace AstroWheelAPI.Controllers
         public async Task<ActionResult<Inventory>> GetInventory(int id)
         {
             var inventory = await _context.Inventories
+                .Include(i => i.InventoryMaterials)
+                .ThenInclude(im => im.Material)
                 .FirstOrDefaultAsync(i => i.InventoryId == id);
 
             if (inventory == null)

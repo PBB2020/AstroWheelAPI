@@ -1,12 +1,14 @@
 ﻿using AstroWheelAPI.Context;
 using AstroWheelAPI.DTOs;
 using AstroWheelAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AstroWheelAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/players")]
     [ApiController]
     public class PlayerController : ControllerBase
     {
@@ -18,14 +20,10 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DTOs.PlayerDTO>>> GetPlayers()
+        public async Task<ActionResult<IEnumerable<PlayerDTO>>> GetPlayers()
         {
             var players = await _context.Players
-                .Include(p => p.Character)
-                .Include(p => p.Island)
-                .Include(p => p.Inventory)// Inventory betöltése
-                .Include(p => p.RecipeBook)
-                .Select(p => new DTOs.PlayerDTO
+                .Select(p => new PlayerDTO
                 {
                     PlayerId = p.PlayerId,
                     PlayerName = p.PlayerName,
@@ -36,9 +34,9 @@ namespace AstroWheelAPI.Controllers
                     TotalScore = p.Inventory != null ? p.Inventory.TotalScore : 0, // Inventory TotalScore hozzáadása
                     LastLogin = p.LastLogin,
                     CreatedAt = p.CreatedAt,
-                    CharacterName = p.Character != null ? p.Character.AstroSign : null,// A karakter neve az Astro_sign mezőből jön
-                    IslandName = p.Island != null ? p.Island.IslandName : null,// A sziget neve az Island táblából jön
-                    RecipeBookId = p.RecipeBookId
+                    CharacterName = p.Character != null ? p.Character.AstroSign : null, // A karakter neve az AstroSign mezőből jön
+                    IslandName = p.Island != null ? p.Island.IslandName : null, // A sziget neve az Island táblából jön
+                    RecipeBookId = p.RecipeBookId,
                 })
                 .ToListAsync();
 
@@ -46,14 +44,23 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DTOs.PlayerDTO>> GetPlayer(int id)
+        public async Task<ActionResult<Player>> GetPlayer(int id)
         {
+            var player = await _context.Players.FindAsync(id);
+                
+            if (player == null)
+            {
+                return NotFound();
+            }
+            return Ok(player);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<PlayerDTO>> GetMyPlayer()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var player = await _context.Players
-                .Include(p => p.Character)
-                .Include(p => p.Island)
-                .Include(p => p.Inventory)
-                .Include(p => p.RecipeBook)
-                .Where(p => p.PlayerId == id)
                 .Select(p => new PlayerDTO
                 {
                     PlayerId = p.PlayerId,
@@ -69,17 +76,58 @@ namespace AstroWheelAPI.Controllers
                     IslandName = p.Island != null ? p.Island.IslandName : null,
                     RecipeBookId = p.RecipeBookId
                 })
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (player == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(player);
+        }
+
+        [HttpGet("withMaterials/{id}")]
+        public async Task<ActionResult<object>> GetPlayerWithMaterials(int id)
+        {
+            var player = await _context.Players
+                .Where(p => p.PlayerId == id)
+                .Select(p => new
+                {
+                    p.PlayerId,
+                    p.PlayerName,
+                    p.UserId,
+                    p.CharacterId,
+                    p.IslandId,
+                    p.InventoryId,
+                    p.RecipeBookId,
+                    TotalScore = p.Inventory != null ? p.Inventory.TotalScore : 0,
+                    p.LastLogin,
+                    p.CreatedAt,
+                    CharacterName = _context.Characters.FirstOrDefault(c => c.CharacterId == p.CharacterId) != null ? _context.Characters.FirstOrDefault(c => c.CharacterId == p.CharacterId)!.AstroSign : null,
+                    IslandName = _context.Islands.FirstOrDefault(i => i.IslandId == p.IslandId) != null ? _context.Islands.FirstOrDefault(i => i.IslandId == p.IslandId)!.IslandName : null,
+                    Materials = _context.InventoryMaterials
+                        .Where(im => im.InventoryId == p.InventoryId)
+                        .Select(im => new
+                        {
+                            im.Material.MaterialId,
+                            im.Material.WitchName,
+                            im.Material.EnglishName,
+                            im.Material.LatinName,
+                            im.Quantity
+                        })
+                        .ToList()
+                })
                 .FirstOrDefaultAsync();
 
             if (player == null)
             {
                 return NotFound();
             }
+
             return Ok(player);
         }
 
         [HttpPost]
-
         public async Task<ActionResult<Player>> CreatePlayer(Player player)
         {
             _context.Players.Add(player);
@@ -104,6 +152,7 @@ namespace AstroWheelAPI.Controllers
             {
                 return NotFound();
             }
+
             // Csak azokat a mezőket frissítjük, amelyek változtak
             existingPlayer.PlayerName = !string.IsNullOrEmpty(player.PlayerName) ? player.PlayerName : existingPlayer.PlayerName;
             existingPlayer.IslandId = player.IslandId != 0 ? player.IslandId : existingPlayer.IslandId;
@@ -147,7 +196,6 @@ namespace AstroWheelAPI.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-
         }
     }
 }
