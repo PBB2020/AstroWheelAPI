@@ -17,21 +17,17 @@ namespace AstroWheelAPI.Models
         [ForeignKey("User")]
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = null!;
-        [Required]
         [ForeignKey("Character")]
-        public int CharacterId { get; set; }
+        public int? CharacterId { get; set; }
         public Character? Character { get; set; }
-        [Required]
         [ForeignKey("Island")]
-        public int  IslandId { get; set; }
+        public int?  IslandId { get; set; }
         public Island? Island { get; set; }
-        [Required]
         [ForeignKey("Inventory")]
-        public int InventoryId { get; set; }
+        public int? InventoryId { get; set; }
         public Inventory? Inventory { get; set; }
-        [Required]
         [ForeignKey("RecipeBook")]
-        public int RecipeBookId { get; set; }
+        public int? RecipeBookId { get; set; }
         public RecipeBook? RecipeBook { get; set; }
         public DateTime? LastLogin { get; set; }
         [Required]

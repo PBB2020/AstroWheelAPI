@@ -1,4 +1,5 @@
-﻿using AstroWheelAPI.Models;
+﻿using AstroWheelAPI.Context;
+using AstroWheelAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -16,26 +17,54 @@ namespace AstroWheelAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        private readonly ApplicationDbContext _context; //Hozzáadva
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ApplicationDbContext context)//Módosítva
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _context = context; //Hozzáadva
         }
 
         [HttpPost("register")]   
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
+            {
+                foreach (var modelStateKey in ModelState.Keys)
+                {
+                    var modelStateVal = ModelState[modelStateKey];
+                    if (modelStateVal != null)//Null ellenőrzés hozzáadása
+                    {
+                        foreach (var error in modelStateVal.Errors)
+                        {
+                            var errorMessage = error.ErrorMessage;
+                            //Logoljuk az errorMessage-t
+                        }
+                    }
+                }
                 return BadRequest(ModelState);
+            }
 
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PlayerName = model.PlayerName };//PlayerName hozzáadva
             var result = await _userManager.CreateAsync(user, model.Password);
 
-            if (!result.Succeeded)
-                return BadRequest(result.Errors);
+            if (result.Succeeded)
+            {
+                //Player entitás létrehozása
+                var player = new Player
+                {
+                    UserId = user.Id,
+                    PlayerName = model.PlayerName,
+                };
 
-            return Ok("User is registered succesfully!");
+                _context.Players.Add(player);
+                await _context.SaveChangesAsync();
+
+                return Ok("User and Player are registered successfully!");
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpPost("login")]

@@ -66,7 +66,7 @@ namespace AstroWheelAPI.Controllers
             _context.Materials.Add(material);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMaterial", new { id = material.MaterialId }, material);
+            return CreatedAtAction(nameof(GetMaterialWithQuantity), new { id = material.MaterialId }, material);
         }
 
         [HttpPut("{id}")]
