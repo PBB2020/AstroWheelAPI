@@ -186,6 +186,7 @@ namespace AstroWheelAPI.Controllers
             existingPlayer.CharacterId = player.CharacterId.HasValue? player.CharacterId : existingPlayer.CharacterId;
             existingPlayer.InventoryId = player.InventoryId.HasValue ? player.InventoryId : existingPlayer.InventoryId;
             existingPlayer.RecipeBookId = player.RecipeBookId.HasValue ? player.RecipeBookId : existingPlayer.RecipeBookId;
+            existingPlayer.LastLogin = DateTime.UtcNow;
 
 
             // TotalScore frissítése az Inventory-ban (mivel ott tárolódik)
