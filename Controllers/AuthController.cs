@@ -2,6 +2,7 @@
 using AstroWheelAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IdentityModel.Tokens.Jwt;
@@ -46,6 +47,23 @@ namespace AstroWheelAPI.Controllers
                 return BadRequest(ModelState);
             }
 
+            //Karakter keresése index alapján
+            var character = await _context.Characters
+                .FirstOrDefaultAsync(c => c.CharacterIndex == model.CharacterId);
+
+            if (character == null)
+            {
+                return BadRequest("Invalid CharacterId");
+            }
+
+            //Inventory létrehozása
+            var inventory = new Inventory
+            {
+                TotalScore = 0, //Alapértelmezett pontszám
+            };
+            _context.Inventories.Add(inventory);
+            await _context.SaveChangesAsync();
+
             var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PlayerName = model.PlayerName };//PlayerName hozzáadva
             var result = await _userManager.CreateAsync(user, model.Password);
 
@@ -56,6 +74,9 @@ namespace AstroWheelAPI.Controllers
                 {
                     UserId = user.Id,
                     PlayerName = model.PlayerName,
+                    CharacterId = character.CharacterId, //Karakter hozzárendelése
+                    InventoryId = inventory.InventoryId, //Inventory hozzárendelése
+                    CreatedAt = DateTime.UtcNow // Létrehozás dátuma
                 };
 
                 _context.Players.Add(player);

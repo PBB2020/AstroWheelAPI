@@ -11,6 +11,7 @@ namespace AstroWheelAPI.Models
         public string AstroSign { get; set; } = string.Empty;
         [Required]
         [StringLength(10)]
-        public string Gender { get; set; } = string.Empty; 
+        public string Gender { get; set; } = string.Empty;
+        public int CharacterIndex { get; set; } // Hozzáadva
     }
 }
