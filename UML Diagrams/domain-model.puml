@@ -68,6 +68,8 @@ class RegisterModel {
     - UserName : string
     - Email : string
     - Password : string
+	- PlayerName : string
+	- CharacterId : int
 }
 
 ' ---------------------------
@@ -78,6 +80,7 @@ class Character {
   - CharacterId : int
   - AstroSign : string
   - Gender : string
+  - CharacterIndex : int
 }
 
 class Inventory {
