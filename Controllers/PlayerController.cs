@@ -162,9 +162,11 @@ namespace AstroWheelAPI.Controllers
 
             return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
         }*/
-        
+
         [HttpPut("{id}")]
+
         public async Task<IActionResult> UpdatePlayer(int id, Player player)
+
         {
             if (id != player.PlayerId)
             {
@@ -172,8 +174,8 @@ namespace AstroWheelAPI.Controllers
             }
 
             var existingPlayer = await _context.Players
-                .Include(p => p.Inventory)
-                .FirstOrDefaultAsync(p => p.PlayerId == id);
+              .Include(p => p.Inventory)
+              .FirstOrDefaultAsync(p => p.PlayerId == id);
 
             if (existingPlayer == null)
             {
@@ -181,15 +183,16 @@ namespace AstroWheelAPI.Controllers
             }
 
             // Csak azokat a mezőket frissítjük, amelyek változtak
+
             existingPlayer.PlayerName = !string.IsNullOrEmpty(player.PlayerName) ? player.PlayerName : existingPlayer.PlayerName;
             existingPlayer.IslandId = player.IslandId.HasValue ? player.IslandId : existingPlayer.IslandId;
-            existingPlayer.CharacterId = player.CharacterId.HasValue? player.CharacterId : existingPlayer.CharacterId;
+            existingPlayer.CharacterId = player.CharacterId.HasValue ? player.CharacterId : existingPlayer.CharacterId;
             existingPlayer.InventoryId = player.InventoryId.HasValue ? player.InventoryId : existingPlayer.InventoryId;
             existingPlayer.RecipeBookId = player.RecipeBookId.HasValue ? player.RecipeBookId : existingPlayer.RecipeBookId;
             existingPlayer.LastLogin = DateTime.UtcNow;
 
-
             // TotalScore frissítése az Inventory-ban (mivel ott tárolódik)
+
             if (existingPlayer.Inventory != null)
             {
                 existingPlayer.Inventory.TotalScore = player.Inventory?.TotalScore ?? existingPlayer.Inventory.TotalScore;
@@ -199,16 +202,19 @@ namespace AstroWheelAPI.Controllers
             {
                 await _context.SaveChangesAsync();
             }
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!_context.Players.Any(p => p.PlayerId == id))
                 {
                     return NotFound();
                 }
+
                 else
                 {
                     throw;
                 }
+
             }
 
             return NoContent();

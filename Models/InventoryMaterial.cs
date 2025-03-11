@@ -10,7 +10,6 @@ namespace AstroWheelAPI.Models
         [Key, Column(Order = 0)]
         [Required]
         public int InventoryId { get; set; }
-
         [Key, Column(Order = 1)]
         [Required]
         public int MaterialId { get; set; }
