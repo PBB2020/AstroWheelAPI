@@ -70,6 +70,9 @@
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    // Loggolás hozzáadása
+    builder.Logging.AddConsole(); // Konzol loggolás
+
     var app = builder.Build();
 
     using (var scope = app.Services.CreateScope())

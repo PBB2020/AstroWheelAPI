@@ -19,12 +19,14 @@ namespace AstroWheelAPI.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context; //Hozzáadva
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ApplicationDbContext context)//Módosítva
+        private readonly ILogger<AuthController> _logger; //ILogger Hozzáadva
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ApplicationDbContext context, ILogger<AuthController> logger)//Módosítva
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _context = context; //Hozzáadva
+            _logger = logger;
         }
 
         [HttpPost("register")]   
@@ -32,59 +34,76 @@ namespace AstroWheelAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                foreach (var modelStateKey in ModelState.Keys)
-                {
-                    var modelStateVal = ModelState[modelStateKey];
-                    if (modelStateVal != null)//Null ellenőrzés hozzáadása
-                    {
-                        foreach (var error in modelStateVal.Errors)
-                        {
-                            var errorMessage = error.ErrorMessage;
-                            //Logoljuk az errorMessage-t
-                        }
-                    }
-                }
+                _logger.LogWarning("Invalid model state during registration: {ModelState}", ModelState); // Loggolás
                 return BadRequest(ModelState);
             }
 
-            //Karakter keresése index alapján
-            var character = await _context.Characters
-                .FirstOrDefaultAsync(c => c.CharacterIndex == model.CharacterId);
+            Character? character;
 
-            if (character == null)
+            if (model.CharacterId == 0)
             {
-                return BadRequest("Invalid CharacterId");
+                character = await _context.Characters.FirstOrDefaultAsync();
+                if (character == null)
+                {
+                    _logger.LogWarning("No default Character found during registration."); // Loggolás
+                    return BadRequest("No default Character found");
+                }
+            }
+            else
+            {
+                character = await _context.Characters.FirstOrDefaultAsync(c => c.CharacterIndex == model.CharacterId); //Karakter keresése index alapján
+                if (character == null)
+                {
+                    _logger.LogWarning("No default Character found during registration."); // Loggolás
+                    return BadRequest("No default Character found");
+                }
             }
 
-            //Inventory létrehozása
-            var inventory = new Inventory
+            //Inventory létrehozása és hibakezelés
+            Inventory inventory;
+            try
             {
-                TotalScore = 0, //Alapértelmezett pontszám
-            };
-            _context.Inventories.Add(inventory);
-            await _context.SaveChangesAsync();
+                inventory = new Inventory { TotalScore = 0 };
+                _context.Inventories.Add(inventory);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating Inventory during registration."); // Loggolás
+                return StatusCode(500, "Error creating Inventory: " + ex.Message);
+            }
 
-            var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PlayerName = model.PlayerName };//PlayerName hozzáadva
+            var user = new ApplicationUser { UserName = model.Email, Email = model.Email, PlayerName = model.PlayerName };
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                //Player entitás létrehozása
-                var player = new Player
+                // Player entitás létrehozása és hibakezelés
+                try
                 {
-                    UserId = user.Id,
-                    PlayerName = model.PlayerName,
-                    CharacterId = character.CharacterId, //Karakter hozzárendelése
-                    InventoryId = inventory.InventoryId, //Inventory hozzárendelése
-                    CreatedAt = DateTime.UtcNow // Létrehozás dátuma
-                };
+                    var player = new Player
+                    {
+                        UserId = user.Id,
+                        PlayerName = model.PlayerName,
+                        CharacterId = character.CharacterId,
+                        InventoryId = inventory.InventoryId,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                _context.Players.Add(player);
-                await _context.SaveChangesAsync();
+                    _context.Players.Add(player);
+                    await _context.SaveChangesAsync();
 
-                return Ok("User and Player are registered successfully!");
+                    _logger.LogInformation("User and Player registered successfully: {UserId}", user.Id); // Loggolás
+                    return Ok("User and Player are registered successfully!");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating Player during registration."); // Loggolás
+                    return StatusCode(500, "Error creating Player: " + ex.Message);
+                }
             }
 
+            _logger.LogError("User registration failed: {Errors}", result.Errors); // Loggolás
             return BadRequest(result.Errors);
         }
 
