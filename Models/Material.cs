@@ -20,5 +20,7 @@ namespace AstroWheelAPI.Models
         public string LatinName { get; set; } = string.Empty;
         [JsonIgnore]
         public ICollection<InventoryMaterial> InventoryMaterials { get; set; } = new List<InventoryMaterial>();
+        [Required]
+        public int MaterialIndex { get; set; }
     }
 }
