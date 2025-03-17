@@ -112,7 +112,7 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpGet("{playerId}/materials")]
-        public async Task<ActionResult<IEnumerable<Material>>> GetPlayerMaterials(int? playerId)
+        public async Task<ActionResult<IEnumerable<PlayerMaterialDTO>>> GetPlayerMaterials(int? playerId)
         {
             if(!playerId.HasValue)
             {
@@ -137,33 +137,37 @@ namespace AstroWheelAPI.Controllers
                 .Where(im => im.InventoryId == player.InventoryId.Value)
                 .ToListAsync();
 
-            var materialIds = inventoryMaterials.Select(im => im.MaterialId).ToList();
+            var playerMaterials = inventoryMaterials.Select(im => new PlayerMaterialDTO
+            {
+                MaterialId = im.MaterialId,
+                Quantity = im.Quantity,
+                // Lekérdezzük az anyag adatait az InventoryMaterial alapján
+                WitchName = _context.Materials.FirstOrDefault(m => m.MaterialId == im.MaterialId)?.WitchName ?? string.Empty,
+                EnglishName = _context.Materials.FirstOrDefault(m => m.MaterialId == im.MaterialId)?.EnglishName ?? string.Empty,
+                LatinName = _context.Materials.FirstOrDefault(m => m.MaterialId == im.MaterialId)?.LatinName ?? string.Empty
+            }).ToList();
 
-            var materials = await _context.Materials
-                .Where(m => materialIds.Contains(m.MaterialId))
-                .ToListAsync();
-
-            return materials;
+            return playerMaterials;
         }
 
-        /*[HttpPost]
-        [Authorize(Roles = "Admin")]// Csak az adminok hozhatnak létre játékost, egyébként regisztráció során létrejön a Player
-        public async Task<ActionResult<Player>> CreatePlayer(Player player)
-        {
-            // Ellenőrizzük, hogy a megadott UserId létezik-e
-            var user = await _context.Users.FindAsync(player.UserId);
-            if (user == null)
-            {
-                return BadRequest("Invalid UserId");
-            }
+/*[HttpPost]
+[Authorize(Roles = "Admin")]// Csak az adminok hozhatnak létre játékost, egyébként regisztráció során létrejön a Player
+public async Task<ActionResult<Player>> CreatePlayer(Player player)
+{
+    // Ellenőrizzük, hogy a megadott UserId létezik-e
+    var user = await _context.Users.FindAsync(player.UserId);
+    if (user == null)
+    {
+        return BadRequest("Invalid UserId");
+    }
 
-            _context.Players.Add(player);
-            await _context.SaveChangesAsync();
+    _context.Players.Add(player);
+    await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
-        }*/
+    return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
+}*/
 
-        [HttpPut("{id}")]
+[HttpPut("{id}")]
 
         public async Task<IActionResult> UpdatePlayer(int id, Player player)
 

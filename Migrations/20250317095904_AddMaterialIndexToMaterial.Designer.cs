@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AstroWheelAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250316205816_AddMaterialIndexToMaterial")]
+    [Migration("20250317095904_AddMaterialIndexToMaterial")]
     partial class AddMaterialIndexToMaterial
     {
         /// <inheritdoc />
