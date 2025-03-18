@@ -86,21 +86,6 @@ namespace AstroWheelAPI.Controllers
                 .Include(p => p.Inventory)
                 .Include(p => p.Character)
                 .Include(p => p.Island)
-                .Select(p => new PlayerDTO
-                {
-                    PlayerId = p.PlayerId,
-                    PlayerName = p.PlayerName,
-                    UserId = p.UserId,
-                    CharacterId = p.CharacterId,
-                    IslandId = p.IslandId,
-                    InventoryId = p.InventoryId,
-                    TotalScore = p.Inventory != null ? p.Inventory.TotalScore : 0,
-                    LastLogin = p.LastLogin,
-                    CreatedAt = p.CreatedAt,
-                    CharacterName = p.Character != null ? p.Character.AstroSign : null,
-                    IslandName = p.Island != null ? p.Island.IslandName : null,
-                    RecipeBookId = p.RecipeBookId
-                })
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (player == null)
@@ -108,7 +93,46 @@ namespace AstroWheelAPI.Controllers
                 return NotFound();
             }
 
-            return Ok(player);
+            var playerMaterials = await _context.InventoryMaterials
+                .Where(im => im.InventoryId == player.InventoryId)
+                .ToListAsync();
+
+            var materialsDictionary = await _context.Materials
+                .ToDictionaryAsync(m => m.MaterialId, m => m);
+
+            var playerMaterialDTOs = playerMaterials
+                .Select(im => new PlayerMaterialDTO
+                {
+                    MaterialId = im.MaterialId,
+                    Quantity = im.Quantity,
+                    WitchName = materialsDictionary.TryGetValue(im.MaterialId, out var material) ?
+                        material?.WitchName ?? string.Empty :
+                        string.Empty,
+                    EnglishName = materialsDictionary.TryGetValue(im.MaterialId, out material) ?
+                          material?.EnglishName ?? string.Empty :
+                          string.Empty,
+                    LatinName = materialsDictionary.TryGetValue(im.MaterialId, out material) ?
+                         material?.LatinName ?? string.Empty :
+                         string.Empty
+                })
+                .ToList();
+
+            return Ok(new PlayerDTO
+            {
+                PlayerId = player.PlayerId,
+                PlayerName = player.PlayerName,
+                UserId = player.UserId,
+                CharacterId = player.CharacterId,
+                IslandId = player.IslandId,
+                InventoryId = player.InventoryId,
+                TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
+                LastLogin = player.LastLogin,
+                CreatedAt = player.CreatedAt,
+                CharacterName = player.Character?.AstroSign,
+                IslandName = player.Island?.IslandName,
+                RecipeBookId = player.RecipeBookId,
+                Materials = playerMaterialDTOs // Ez a sor a lényeg
+            });
         }
 
         [HttpGet("{playerId}/materials")]

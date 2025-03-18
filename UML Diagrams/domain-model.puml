@@ -105,6 +105,7 @@ class Material {
   - WitchName : string
   - EnglishName : string
   - LatinName : string
+  - MaterialIndex : int
 }
 
 class Player {

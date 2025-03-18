@@ -14,5 +14,6 @@
         public DateTime CreatedAt  { get; set; }    
         public string? CharacterName { get; set; }
         public string? IslandName { get; set; }
+        public List<PlayerMaterialDTO>? Materials { get; set; } // Hozzáadott sor
     }
 }
