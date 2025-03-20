@@ -144,6 +144,11 @@ namespace AstroWheelAPI.Controllers
                 return NotFound();
             }
 
+            //LastLogin frissítése
+            player.LastLogin = DateTime.UtcNow;
+            _context.Entry(player).State = EntityState.Modified; //Vagy _context.Players.Update(player);
+            await _context.SaveChangesAsync();
+
             var playerMaterials = await _context.InventoryMaterials
                 .Where(im => im.InventoryId == player.InventoryId)
                 .ToListAsync();
