@@ -271,7 +271,7 @@ namespace AstroWheelAPI.Controllers
 
             existingPlayer.PlayerName = !string.IsNullOrEmpty(playerDTO.PlayerName) ? playerDTO.PlayerName : existingPlayer.PlayerName;
             existingPlayer.IslandId = playerDTO.IslandId.HasValue ? playerDTO.IslandId : existingPlayer.IslandId;
-            existingPlayer.CharacterId = playerDTO.CharacterId.HasValue ? playerDTO.CharacterId : existingPlayer.CharacterId;
+            existingPlayer.CharacterId = playerDTO.CharacterId;
             existingPlayer.InventoryId = playerDTO.InventoryId.HasValue ? playerDTO.InventoryId : existingPlayer.InventoryId;
             existingPlayer.RecipeBookId = playerDTO.RecipeBookId.HasValue ? playerDTO.RecipeBookId : existingPlayer.RecipeBookId;
             existingPlayer.LastLogin = DateTime.UtcNow;

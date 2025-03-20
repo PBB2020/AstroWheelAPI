@@ -42,6 +42,13 @@ namespace AstroWheelAPI.Context
                 .HasOne(im => im.Material)
                 .WithMany(m => m.InventoryMaterials)
                 .HasForeignKey(im => im.MaterialId);
+
+            // Kötelező 1:1 kapcsolat a Player és a Character között
+            builder.Entity<Player>()
+                .HasOne(p => p.Character)
+                .WithOne()
+                .HasForeignKey<Player>(p => p.CharacterId)
+                .IsRequired(); // Kötelező kapcsolat
         }
     }
 }

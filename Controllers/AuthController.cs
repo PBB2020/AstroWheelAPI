@@ -38,25 +38,14 @@ namespace AstroWheelAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            Character? character;
+            // Megkeressük a Character-t a CharacterIndex alapján
+            var character = await _context.Characters
+                .FirstOrDefaultAsync(c => c.CharacterIndex == model.CharacterIndex);
 
-            if (model.CharacterId == 0)
+            if (character == null)
             {
-                character = await _context.Characters.FirstOrDefaultAsync();
-                if (character == null)
-                {
-                    _logger.LogWarning("No default Character found during registration."); // Loggolás
-                    return BadRequest("No default Character found");
-                }
-            }
-            else
-            {
-                character = await _context.Characters.FirstOrDefaultAsync(c => c.CharacterIndex == model.CharacterId); //Karakter keresése index alapján
-                if (character == null)
-                {
-                    _logger.LogWarning("No default Character found during registration."); // Loggolás
-                    return BadRequest("No default Character found");
-                }
+                _logger.LogWarning("Character with index {CharacterIndex} not found during registration.", model.CharacterIndex);
+                return BadRequest($"Character with index {model.CharacterIndex} not found");
             }
 
             //Inventory létrehozása és hibakezelés
@@ -86,6 +75,7 @@ namespace AstroWheelAPI.Controllers
                         UserId = user.Id,
                         PlayerName = model.PlayerName,
                         CharacterId = character.CharacterId,
+                        Character = character, // Módosítás: Character navigációs tulajdonság beállítása
                         InventoryId = inventory.InventoryId,
                         CreatedAt = DateTime.UtcNow
                     };

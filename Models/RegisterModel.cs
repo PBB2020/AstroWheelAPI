@@ -16,6 +16,7 @@ namespace AstroWheelAPI.Models
         [Required]
         [StringLength(255)]
         public string PlayerName { get; set; } = string.Empty;
-        public int CharacterId { get; set; }
+        [Required]
+        public int CharacterIndex { get; set; }
     }
 }

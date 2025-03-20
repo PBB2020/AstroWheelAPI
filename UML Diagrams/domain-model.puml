@@ -152,7 +152,8 @@ ApplicationUser "1" -- "0..*" AspNetUserToken : holds token
 
 class ApplicationDbContext {
   + Users : DbSet<ApplicationUser>
-  + Players : DbSet<Player>
+ 
+ + Players : DbSet<Player>
   + Inventories : DbSet<Inventory>
   + Characters : DbSet<Character>
   + Materials : DbSet<Material>

@@ -5,7 +5,7 @@
         public int PlayerId { get; set; }
         public string PlayerName { get; set;  } = string.Empty;
         public string UserId { get; set; } = string.Empty;
-        public int? CharacterId { get; set; }
+        public int CharacterId { get; set; }
         public int? IslandId { get; set; }
         public int? InventoryId { get; set; }
         public int? RecipeBookId { get; set; }
