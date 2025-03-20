@@ -26,26 +26,53 @@ namespace AstroWheelAPI.Controllers
                 .Include(p => p.Inventory)
                 .Include(p => p.Character)
                 .Include(p => p.Island)
-                .Select(p => new PlayerDTO
-                {
-                    PlayerId = p.PlayerId,
-                    PlayerName = p.PlayerName,
-                    UserId = p.UserId,
-                    CharacterId = p.CharacterId,
-                    IslandId = p.IslandId,
-                    InventoryId = p.InventoryId,
-                    TotalScore = p.Inventory != null ? p.Inventory.TotalScore : 0, // Inventory TotalScore hozzáadása
-                    LastLogin = p.LastLogin,
-                    CreatedAt = p.CreatedAt,
-                    CharacterName = p.Character != null ? p.Character.AstroSign : null, // A karakter neve az AstroSign mezőből jön
-                    IslandName = p.Island != null ? p.Island.IslandName : null, // A sziget neve az Island táblából jön
-                    RecipeBookId = p.RecipeBookId,
-                })
                 .ToListAsync();
 
-            return Ok(players);
-        }
+            var materialsDictionary = await _context.Materials
+                .ToDictionaryAsync(m => m.MaterialId, m => m);
 
+            var playerDTOs = new List<PlayerDTO>();
+            foreach (var player in players)
+            {
+                var playerMaterials = await _context.InventoryMaterials
+                    .Where(im => im.InventoryId == player.InventoryId)
+                    .ToListAsync();
+
+                var playerMaterialDTOs = playerMaterials
+                    .Select(im => new PlayerMaterialDTO
+                    {
+                        MaterialId = im.MaterialId,
+                        Quantity = im.Quantity,
+                        WitchName = materialsDictionary.TryGetValue(im.MaterialId, out var material) && material != null ?
+                                    material.WitchName : string.Empty,
+                        EnglishName = materialsDictionary.TryGetValue(im.MaterialId, out material) && material != null ?
+                                      material.EnglishName : string.Empty, 
+                        LatinName = materialsDictionary.TryGetValue(im.MaterialId, out material) && material != null ?
+                                    material.LatinName : string.Empty
+                    })
+                    .ToList();
+
+                playerDTOs.Add(new PlayerDTO
+                {
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.PlayerName,
+                    UserId = player.UserId,
+                    CharacterId = player.CharacterId,
+                    IslandId = player.IslandId,
+                    InventoryId = player.InventoryId,
+                    TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
+                    LastLogin = player.LastLogin,
+                    CreatedAt = player.CreatedAt,
+                    CharacterName = player.Character?.AstroSign,
+                    IslandName = player.Island?.IslandName,
+                    RecipeBookId = player.RecipeBookId,
+                    Materials = playerMaterialDTOs
+                });
+            }
+            
+            return Ok(playerDTOs);
+        }
+       
         [HttpGet("{id}")]
         public async Task<ActionResult<PlayerDTO>> GetPlayer(int id)
         {
@@ -53,28 +80,52 @@ namespace AstroWheelAPI.Controllers
                 .Include(p => p.Inventory)
                 .Include(p => p.Character)
                 .Include(p => p.Island)
-                .Select(p => new PlayerDTO
-                {
-                    PlayerId = p.PlayerId,
-                    PlayerName = p.PlayerName, //PlayerName hozzáadása
-                    UserId = p.UserId,
-                    CharacterId = p.CharacterId,
-                    IslandId = p.IslandId,
-                    InventoryId = p.InventoryId,
-                    TotalScore = p.Inventory != null ? p.Inventory.TotalScore : 0,
-                    LastLogin = p.LastLogin,
-                    CreatedAt = p.CreatedAt,
-                    CharacterName = p.Character != null ? p.Character.AstroSign : null,
-                    IslandName = p.Island != null ? p.Island.IslandName : null,
-                    RecipeBookId = p.RecipeBookId
-                })
                 .FirstOrDefaultAsync(p => p.PlayerId == id);
-                
+
             if (player == null)
             {
                 return NotFound();
             }
-            return Ok(player);
+
+            var materialsDictionary = await _context.Materials
+                .ToDictionaryAsync(m => m.MaterialId, m => m);
+
+            var playerMaterials = await _context.InventoryMaterials
+                .Where(im => im.InventoryId == player.InventoryId)
+                .ToListAsync();
+
+            var playerMaterialDTOs = playerMaterials
+                .Select(im => new PlayerMaterialDTO
+                {
+                    MaterialId = im.MaterialId,
+                    Quantity = im.Quantity,
+                    WitchName = materialsDictionary.TryGetValue(im.MaterialId, out var material) && material != null ?
+                                    material.WitchName : string.Empty,
+                    EnglishName = materialsDictionary.TryGetValue(im.MaterialId, out material) && material != null ?
+                                      material.EnglishName : string.Empty, 
+                    LatinName = materialsDictionary.TryGetValue(im.MaterialId, out material) && material != null ?
+                                    material.LatinName : string.Empty
+                })
+                .ToList();
+
+           var playerDTO = new PlayerDTO
+           {
+               PlayerId = player.PlayerId,
+               PlayerName = player.PlayerName,
+               UserId = player.UserId,
+               CharacterId = player.CharacterId,
+               IslandId = player.IslandId,
+               InventoryId = player.InventoryId,
+               TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
+               LastLogin = player.LastLogin,
+               CreatedAt = player.CreatedAt,
+               CharacterName = player.Character?.AstroSign,
+               IslandName = player.Island?.IslandName,
+               RecipeBookId = player.RecipeBookId,
+               Materials = playerMaterialDTOs
+           };
+ 
+            return Ok(playerDTO);
         }
 
         [HttpGet("me")]
@@ -174,35 +225,36 @@ namespace AstroWheelAPI.Controllers
             return playerMaterials;
         }
 
-/*[HttpPost]
-[Authorize(Roles = "Admin")]// Csak az adminok hozhatnak létre játékost, egyébként regisztráció során létrejön a Player
-public async Task<ActionResult<Player>> CreatePlayer(Player player)
-{
-    // Ellenőrizzük, hogy a megadott UserId létezik-e
-    var user = await _context.Users.FindAsync(player.UserId);
-    if (user == null)
-    {
-        return BadRequest("Invalid UserId");
-    }
+        /*[HttpPost]
+        [Authorize(Roles = "Admin")]// Csak az adminok hozhatnak létre játékost, egyébként regisztráció során létrejön a Player
+        public async Task<ActionResult<Player>> CreatePlayer(Player player)
+        {
+         // Ellenőrizzük, hogy a megadott UserId létezik-e
+        var user = await _context.Users.FindAsync(player.UserId);
+        if (user == null)
+        {
+         return BadRequest("Invalid UserId");
+        }
 
-    _context.Players.Add(player);
-    await _context.SaveChangesAsync();
+            context.Players.Add(player);
+            await _context.SaveChangesAsync();
 
-    return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
-}*/
+            return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
+        }*/
 
-[HttpPut("{id}")]
+        [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdatePlayer(int id, Player player)
+        public async Task<IActionResult> UpdatePlayer(int id, PlayerDTO playerDTO)
 
         {
-            if (id != player.PlayerId)
+            if (id != playerDTO.PlayerId)
             {
                 return BadRequest("ID mismatch");
             }
 
             var existingPlayer = await _context.Players
               .Include(p => p.Inventory)
+              .Include(p => p.Inventory != null ? p.Inventory.InventoryMaterials : null) //InventoryMaterials betöltése
               .FirstOrDefaultAsync(p => p.PlayerId == id);
 
             if (existingPlayer == null)
@@ -210,22 +262,41 @@ public async Task<ActionResult<Player>> CreatePlayer(Player player)
                 return NotFound();
             }
 
-            // Csak azokat a mezőket frissítjük, amelyek változtak
+            //Csak azokat a mezőket frissítjük, amelyek változtak
 
-            existingPlayer.PlayerName = !string.IsNullOrEmpty(player.PlayerName) ? player.PlayerName : existingPlayer.PlayerName;
-            existingPlayer.IslandId = player.IslandId.HasValue ? player.IslandId : existingPlayer.IslandId;
-            existingPlayer.CharacterId = player.CharacterId.HasValue ? player.CharacterId : existingPlayer.CharacterId;
-            existingPlayer.InventoryId = player.InventoryId.HasValue ? player.InventoryId : existingPlayer.InventoryId;
-            existingPlayer.RecipeBookId = player.RecipeBookId.HasValue ? player.RecipeBookId : existingPlayer.RecipeBookId;
+            existingPlayer.PlayerName = !string.IsNullOrEmpty(playerDTO.PlayerName) ? playerDTO.PlayerName : existingPlayer.PlayerName;
+            existingPlayer.IslandId = playerDTO.IslandId.HasValue ? playerDTO.IslandId : existingPlayer.IslandId;
+            existingPlayer.CharacterId = playerDTO.CharacterId.HasValue ? playerDTO.CharacterId : existingPlayer.CharacterId;
+            existingPlayer.InventoryId = playerDTO.InventoryId.HasValue ? playerDTO.InventoryId : existingPlayer.InventoryId;
+            existingPlayer.RecipeBookId = playerDTO.RecipeBookId.HasValue ? playerDTO.RecipeBookId : existingPlayer.RecipeBookId;
             existingPlayer.LastLogin = DateTime.UtcNow;
 
-            // TotalScore frissítése az Inventory-ban (mivel ott tárolódik)
-
+            //TotalScore frissítése az Inventory-ban (mivel ott tárolódik)
             if (existingPlayer.Inventory != null)
             {
-                existingPlayer.Inventory.TotalScore = player.Inventory?.TotalScore ?? existingPlayer.Inventory.TotalScore;
+                existingPlayer.Inventory.TotalScore = playerDTO.TotalScore;
             }
 
+            //InventoryMaterials frissítése
+            if (playerDTO.Materials != null)
+            {
+                //Először töröljük a meglévő InventoryMaterials-t
+                if (existingPlayer.Inventory?.InventoryMaterials != null)
+                {
+                    existingPlayer.Inventory.InventoryMaterials.Clear();
+                }
+
+                //Majd hozzáadjuk az új InventoryMaterials-t
+                foreach (var materialDTO in playerDTO.Materials)
+                {
+                    existingPlayer.Inventory?.InventoryMaterials.Add(new InventoryMaterial
+                    {
+                        MaterialId = materialDTO.MaterialId,
+                        Quantity = materialDTO.Quantity,
+                        InventoryId = existingPlayer.InventoryId.GetValueOrDefault() //Feltételezzük, hogy az InventoryId nem null
+                    });
+                }
+            }
             try
             {
                 await _context.SaveChangesAsync();

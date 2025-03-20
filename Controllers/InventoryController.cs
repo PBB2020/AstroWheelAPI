@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AstroWheelAPI.Context;
+using AstroWheelAPI.DTOs;
+using System.Collections.Concurrent;
 
 namespace AstroWheelAPI.Controllers
 {
@@ -17,16 +19,29 @@ namespace AstroWheelAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Inventory>>> GetInventories()
+        public async Task<ActionResult<IEnumerable<DTOs.InventoryWithPlayerDTO>>> GetInventories()
         {
-            return await _context.Inventories
+            var inventories = await _context.Inventories
                 .Include(i => i.InventoryMaterials)
                 .ThenInclude(im => im.Material)
                 .ToListAsync();
+
+            var inventoryDTOs = inventories.Join(_context.Players,
+                inventory => inventory.InventoryId,
+                player => player.InventoryId,
+                (inventory, player) => new InventoryWithPlayerDTO
+                {
+                    InventoryId = inventory.InventoryId,
+                    TotalScore = inventory.TotalScore,
+                    PlayerId = player.PlayerId,
+                    PlayerName = player.PlayerName
+                }).ToList();
+
+            return Ok(inventoryDTOs);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Inventory>> GetInventory(int id)
+        public async Task<ActionResult<InventoryWithPlayerDTO>> GetInventory(int id)
         {
             var inventory = await _context.Inventories
                 .Include(i => i.InventoryMaterials)
@@ -38,27 +53,66 @@ namespace AstroWheelAPI.Controllers
                 return NotFound();
             }
 
-            return inventory;
+            var player = await _context.Players.FirstOrDefaultAsync(p => p.InventoryId == id);
+
+            if (player ==  null)
+            {
+                return NotFound(); // Ha nincs játékos az adott InventoryId-val
+            }
+
+            var inventoryDTO = new InventoryWithPlayerDTO
+            {
+                InventoryId = inventory.InventoryId,
+                TotalScore = inventory.TotalScore,
+                PlayerId = player.PlayerId,
+                PlayerName = player.PlayerName
+            };
+
+            return Ok(inventoryDTO);
         }
 
         [HttpPost]
 
-        public async Task<ActionResult<Inventory>> PostInventory(Inventory inventory)
+        public async Task<ActionResult<InventoryWithPlayerDTO>> PostInventory(Inventory inventory)
         {
             _context.Inventories.Add(inventory);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetInventory", new { id = inventory.InventoryId }, inventory);
+            var player = await _context.Players.FirstOrDefaultAsync(p => p.InventoryId == inventory.InventoryId);
+
+            if (player == null)
+            {
+                return CreatedAtAction("GetInventory", new { id = inventory.InventoryId }, inventory);// Ha nincs játékos, akkor csak az inventory-t adjuk vissza
+            }
+
+            var inventoryDTO = new InventoryWithPlayerDTO
+            {
+                InventoryId = inventory.InventoryId,
+                TotalScore = inventory.TotalScore,
+                PlayerId = player.PlayerId,
+                PlayerName = player.PlayerName
+            };
+
+            return CreatedAtAction("GetInventory", new { id = inventory.InventoryId }, inventoryDTO);
         }
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> PutInventory(int id, Inventory inventory)
+        public async Task<IActionResult> PutInventory(int id, InventoryWithPlayerDTO inventoryDTO)
         {
-            if (id != inventory.InventoryId)
+            if (id != inventoryDTO.InventoryId)
             {
                 return BadRequest();
             }
+
+            var inventory = await _context.Inventories.FindAsync(id);
+
+            if (inventory == null)
+            {
+                return NotFound();
+            }
+
+            inventory.TotalScore = inventoryDTO.TotalScore; //Csak a TotalScore-t frissítjük
 
             _context.Entry(inventory).State = EntityState.Modified;
 
