@@ -69,7 +69,7 @@ class RegisterModel {
     - Email : string
     - Password : string
 	- PlayerName : string
-	- CharacterId : int
+	- CharacterIndex : int
 }
 
 ' ---------------------------
@@ -130,21 +130,21 @@ class RecipeBook {
 ' Kapcsolatok beállítása
 ' ---------------------------
 
-ApplicationUser "1" -- "0..*" Player : has
-Player "1" -- "1" Character : uses
-Player "1" -- "1" Island : located on
-Player "1" -- "1" Inventory : owns
-Player "1" -- "1" RecipeBook : possesses
-Island "1" -- "0..*" Player : contains
-Inventory "1" -- "0..*" InventoryMaterial : contains
-Material "1" -- "0..*" InventoryMaterial : referenced in
+ApplicationUser "1" --> "0..*" Player : has
+Player "1" --> "1" Character : uses
+Player "1" --> "1" Island : located on
+Player "1" --> "1" Inventory : owns
+Player "1" --> "1" RecipeBook : possesses
+Island "1" --> "0..*" Player : contains
+Inventory "1" --> "0..*" InventoryMaterial : contains
+Material "1" --> "0..*" InventoryMaterial : referenced in
 
 ' ASP.NET Identity kapcsolatok
-ApplicationUser "1" -- "0..*" AspNetUserRole : assigned
-AspNetRole "1" -- "0..*" AspNetUserRole : contains
-ApplicationUser "1" -- "0..*" AspNetUserClaim : has
-ApplicationUser "1" -- "0..*" AspNetUserLogin : authenticated by
-ApplicationUser "1" -- "0..*" AspNetUserToken : holds token
+ApplicationUser "1" --> "0..*" AspNetUserRole : assigned
+AspNetRole "1" --> "0..*" AspNetUserRole : contains
+ApplicationUser "1" --> "0..*" AspNetUserClaim : has
+ApplicationUser "1" --> "0..*" AspNetUserLogin : authenticated by
+ApplicationUser "1" --> "0..*" AspNetUserToken : holds token
 
 ' ---------------------------
 ' ApplicationDbContext osztály (DbSet-ekkel)
