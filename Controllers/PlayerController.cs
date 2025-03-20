@@ -146,7 +146,7 @@ namespace AstroWheelAPI.Controllers
 
             //LastLogin frissítése
             player.LastLogin = DateTime.UtcNow;
-            _context.Entry(player).State = EntityState.Modified; //Vagy _context.Players.Update(player);
+            _context.Entry(player).State = EntityState.Modified; 
             await _context.SaveChangesAsync();
 
             var playerMaterials = await _context.InventoryMaterials
