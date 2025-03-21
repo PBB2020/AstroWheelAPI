@@ -82,7 +82,7 @@ namespace AstroWheelAPI.Controllers
 
             if (player == null)
             {
-                return CreatedAtAction("GetInventory", new { id = inventory.InventoryId }, inventory);// Ha nincs játékos, akkor csak az inventory-t adjuk vissza
+                return NotFound("Player not found for the given InventoryId.");
             }
 
             var inventoryDTO = new InventoryWithPlayerDTO
