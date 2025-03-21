@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AstroWheelAPI.Context;
 using AstroWheelAPI.DTOs;
+using Microsoft.Extensions.Logging;
 
 namespace AstroWheelAPI.Controllers
 {
@@ -11,10 +12,12 @@ namespace AstroWheelAPI.Controllers
     public class InventoryMaterialController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<InventoryMaterialController> _logger; // Add this line
 
-        public InventoryMaterialController(ApplicationDbContext context)
+        public InventoryMaterialController(ApplicationDbContext context, ILogger<InventoryMaterialController> logger) // Modify the constructor
         {
             _context = context;
+            _logger = logger; // Initialize the logger
         }
 
         [HttpGet]
@@ -51,17 +54,75 @@ namespace AstroWheelAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<InventoryMaterial>> PostInventoryMaterial(InventoryMaterialDTO inventoryMaterialDTO)
         {
-            var inventoryMaterial = new InventoryMaterial
+            //Ellenőrizzük, hogy az Inventory létezik-e
+            if (!await _context.Inventories.AnyAsync(i => i.InventoryId == inventoryMaterialDTO.InventoryId))
             {
-                InventoryId = inventoryMaterialDTO.InventoryId,
-                MaterialId = inventoryMaterialDTO.MaterialId,
-                Quantity = inventoryMaterialDTO.Quantity
-            };
+                return BadRequest("Invalid InventoryId");
+            }
 
-            _context.InventoryMaterials.Add(inventoryMaterial);
-            await _context.SaveChangesAsync();
+            //Ellenőrizzük, hgoy a Material létezik-e
+            if (!await _context.Materials.AnyAsync(m => m.MaterialId == inventoryMaterialDTO.MaterialId))
+            {
+                return BadRequest("Invalid MaterialId");
+            }
 
-            return CreatedAtAction(nameof(GetInventoryMaterial), new { inventoryId = inventoryMaterial.InventoryId, materialId = inventoryMaterial.MaterialId }, inventoryMaterial);
+            // Ellenőrizzük, hogy a rekord már létezik-e
+            var existingInventoryMaterial = await _context.InventoryMaterials.FindAsync(inventoryMaterialDTO.InventoryId, inventoryMaterialDTO.MaterialId);
+
+            if (existingInventoryMaterial != null)
+            {
+                // A rekord már létezik, frissítjük a Quantity értékét
+                existingInventoryMaterial.Quantity += inventoryMaterialDTO.Quantity;
+                _context.Entry(existingInventoryMaterial).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    return Ok(existingInventoryMaterial);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    _logger.LogError(ex, "Concurrency error during InventoryMaterial update.");
+                    return Conflict("Concurrency error occurred.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error updating InventoryMaterial.");
+                    return StatusCode(500, "Internal server error.");
+                }
+            }
+            else
+            {
+                // A rekord nem létezik, hozzáadjuk az újat
+                var inventoryMaterial = new InventoryMaterial
+                {
+                    InventoryId = inventoryMaterialDTO.InventoryId,
+                    MaterialId = inventoryMaterialDTO.MaterialId,
+                    Quantity = inventoryMaterialDTO.Quantity
+                };
+
+                _context.InventoryMaterials.Add(inventoryMaterial);
+                try
+                {
+                    await _context.SaveChangesAsync();
+
+                    // Explicit betöltés hozzáadása
+                    await _context.Entry(inventoryMaterial).Reference(im => im.Inventory).LoadAsync();
+                    await _context.Entry(inventoryMaterial).Reference(im => im.Material).LoadAsync();
+
+                    return CreatedAtAction(nameof(GetInventoryMaterial), new { inventoryId = inventoryMaterial.InventoryId, materialId = inventoryMaterial.MaterialId }, inventoryMaterial);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogError(ex, "Invalid operation error during InventoryMaterial creation. Message: {Message}, StackTrace: {StackTrace}, InnerException: {InnerException}", ex.Message, ex.StackTrace, ex.InnerException);
+                    return StatusCode(500, "Invalid operation error during InventoryMaterial creation.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "General error during InventoryMaterial creation. Message: {Message}, StackTrace: {StackTrace}, InnerException: {InnerException}", ex.Message, ex.StackTrace, ex.InnerException);
+                    return StatusCode(500, "Internal server error during InventoryMaterial creation.");
+                }
+            }
         }
 
         [HttpPut("{inventoryId}/{materialId}")]
