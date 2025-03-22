@@ -102,7 +102,7 @@ namespace AstroWheelAPI.Controllers
         {
             if (id != inventoryDTO.InventoryId)
             {
-                return BadRequest();
+                return BadRequest("InventoryId mismatch"); // Részletesebb hibaüzenet
             }
 
             var inventory = await _context.Inventories.FindAsync(id);
@@ -122,7 +122,7 @@ namespace AstroWheelAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!InventoryExists(id))
+                if (!_context.Inventories.Any(e => e.InventoryId == id)) // Hatékonyabb ellenőrzés
                 {
                     return NotFound();
                 }

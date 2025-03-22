@@ -249,7 +249,7 @@ namespace AstroWheelAPI.Controllers
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdatePlayer(int id, PlayerDTO playerDTO)
+        public async Task<IActionResult> UpdatePlayer(int id, PlayerDTOPUT playerDTO)
 
         {
             if (id != playerDTO.PlayerId)
@@ -259,7 +259,6 @@ namespace AstroWheelAPI.Controllers
 
             var existingPlayer = await _context.Players
               .Include(p => p.Inventory)
-              .Include(p => p.Inventory != null ? p.Inventory.InventoryMaterials : null) //InventoryMaterials betöltése
               .FirstOrDefaultAsync(p => p.PlayerId == id);
 
             if (existingPlayer == null)
@@ -271,56 +270,25 @@ namespace AstroWheelAPI.Controllers
 
             existingPlayer.PlayerName = !string.IsNullOrEmpty(playerDTO.PlayerName) ? playerDTO.PlayerName : existingPlayer.PlayerName;
             existingPlayer.IslandId = playerDTO.IslandId.HasValue ? playerDTO.IslandId : existingPlayer.IslandId;
-            existingPlayer.CharacterId = playerDTO.CharacterId;
-            existingPlayer.InventoryId = playerDTO.InventoryId.HasValue ? playerDTO.InventoryId : existingPlayer.InventoryId;
-            existingPlayer.RecipeBookId = playerDTO.RecipeBookId.HasValue ? playerDTO.RecipeBookId : existingPlayer.RecipeBookId;
             existingPlayer.LastLogin = DateTime.UtcNow;
 
-            //TotalScore frissítése az Inventory-ban (mivel ott tárolódik)
-            if (existingPlayer.Inventory != null)
-            {
-                existingPlayer.Inventory.TotalScore = playerDTO.TotalScore;
-            }
+            _context.Entry(existingPlayer).State = EntityState.Modified;
 
-            //InventoryMaterials frissítése
-            if (playerDTO.Materials != null)
-            {
-                //Először töröljük a meglévő InventoryMaterials-t
-                if (existingPlayer.Inventory?.InventoryMaterials != null)
-                {
-                    existingPlayer.Inventory.InventoryMaterials.Clear();
-                }
-
-                //Majd hozzáadjuk az új InventoryMaterials-t
-                foreach (var materialDTO in playerDTO.Materials)
-                {
-                    existingPlayer.Inventory?.InventoryMaterials.Add(new InventoryMaterial
-                    {
-                        MaterialId = materialDTO.MaterialId,
-                        Quantity = materialDTO.Quantity,
-                        InventoryId = existingPlayer.InventoryId.GetValueOrDefault() //Feltételezzük, hogy az InventoryId nem null
-                    });
-                }
-            }
             try
             {
                 await _context.SaveChangesAsync();
             }
-
             catch (DbUpdateConcurrencyException)
             {
                 if (!_context.Players.Any(p => p.PlayerId == id))
                 {
                     return NotFound();
                 }
-
                 else
                 {
                     throw;
                 }
-
             }
-
             return NoContent();
         }
 
