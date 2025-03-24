@@ -35,7 +35,10 @@ namespace AstroWheelAPI.Controllers
                     TotalScore = inventory.TotalScore,
                     PlayerId = player.PlayerId,
                     PlayerName = player.PlayerName
-                }).ToList();
+                })
+                .OrderByDescending(dto => dto.TotalScore) //Hozzáadva: rendezés TotalScore szerint csökkenő sorrendben
+                .ThenBy(dto => dto.PlayerName) //Hozzáadva: PlayerName szerinti rendezés is
+                .ToList();
 
             return Ok(inventoryDTOs);
         }
