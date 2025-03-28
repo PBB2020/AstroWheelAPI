@@ -249,7 +249,7 @@ namespace AstroWheelAPI.Controllers
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdatePlayer(int id, PlayerDTOPUT playerDTO)
+        public async Task<IActionResult> UpdatePlayer(int id, PlayerPutDTO playerDTO)
 
         {
             if (id != playerDTO.PlayerId)
