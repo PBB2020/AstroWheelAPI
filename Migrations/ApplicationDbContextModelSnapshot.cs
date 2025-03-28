@@ -243,14 +243,14 @@ namespace AstroWheelAPI.Migrations
 
                     b.HasKey("PlayerId");
 
-                    b.HasIndex("CharacterId")
-                        .IsUnique();
+                    b.HasIndex("CharacterId");
 
                     b.HasIndex("InventoryId");
 
                     b.HasIndex("IslandId");
 
-                    b.HasIndex("RecipeBookId");
+                    b.HasIndex("RecipeBookId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -259,7 +259,7 @@ namespace AstroWheelAPI.Migrations
 
             modelBuilder.Entity("AstroWheelAPI.Models.RecipeBook", b =>
                 {
-                    b.Property<int>("RecipeId")
+                    b.Property<int>("RecipeBookId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -267,12 +267,12 @@ namespace AstroWheelAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("RecipeName")
+                    b.Property<string>("RecipeBookName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("RecipeId");
+                    b.HasKey("RecipeBookId");
 
                     b.ToTable("RecipeBooks");
                 });
@@ -427,8 +427,8 @@ namespace AstroWheelAPI.Migrations
             modelBuilder.Entity("AstroWheelAPI.Models.Player", b =>
                 {
                     b.HasOne("AstroWheelAPI.Models.Character", "Character")
-                        .WithOne()
-                        .HasForeignKey("AstroWheelAPI.Models.Player", "CharacterId")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -441,8 +441,8 @@ namespace AstroWheelAPI.Migrations
                         .HasForeignKey("IslandId");
 
                     b.HasOne("AstroWheelAPI.Models.RecipeBook", "RecipeBook")
-                        .WithMany()
-                        .HasForeignKey("RecipeBookId");
+                        .WithOne()
+                        .HasForeignKey("AstroWheelAPI.Models.Player", "RecipeBookId");
 
                     b.HasOne("AstroWheelAPI.Models.ApplicationUser", "User")
                         .WithMany()

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AstroWheelAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250306160210_MakePlayerCharacterIslandInventoryRecipeNullable")]
-    partial class MakePlayerCharacterIslandInventoryRecipeNullable
+    [Migration("20250328171350_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -114,6 +114,9 @@ namespace AstroWheelAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int>("CharacterIndex")
+                        .HasColumnType("int");
+
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -214,7 +217,7 @@ namespace AstroWheelAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int?>("CharacterId")
+                    b.Property<int>("CharacterId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -249,7 +252,8 @@ namespace AstroWheelAPI.Migrations
 
                     b.HasIndex("IslandId");
 
-                    b.HasIndex("RecipeBookId");
+                    b.HasIndex("RecipeBookId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -258,7 +262,7 @@ namespace AstroWheelAPI.Migrations
 
             modelBuilder.Entity("AstroWheelAPI.Models.RecipeBook", b =>
                 {
-                    b.Property<int>("RecipeId")
+                    b.Property<int>("RecipeBookId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
@@ -266,12 +270,12 @@ namespace AstroWheelAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("RecipeName")
+                    b.Property<string>("RecipeBookName")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("RecipeId");
+                    b.HasKey("RecipeBookId");
 
                     b.ToTable("RecipeBooks");
                 });
@@ -427,7 +431,9 @@ namespace AstroWheelAPI.Migrations
                 {
                     b.HasOne("AstroWheelAPI.Models.Character", "Character")
                         .WithMany()
-                        .HasForeignKey("CharacterId");
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("AstroWheelAPI.Models.Inventory", "Inventory")
                         .WithMany()
@@ -438,8 +444,8 @@ namespace AstroWheelAPI.Migrations
                         .HasForeignKey("IslandId");
 
                     b.HasOne("AstroWheelAPI.Models.RecipeBook", "RecipeBook")
-                        .WithMany()
-                        .HasForeignKey("RecipeBookId");
+                        .WithOne()
+                        .HasForeignKey("AstroWheelAPI.Models.Player", "RecipeBookId");
 
                     b.HasOne("AstroWheelAPI.Models.ApplicationUser", "User")
                         .WithMany()

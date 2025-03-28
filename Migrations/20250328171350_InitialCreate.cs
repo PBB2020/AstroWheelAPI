@@ -67,7 +67,8 @@ namespace AstroWheelAPI.Migrations
                     CharacterId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     AstroSign = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Gender = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false)
+                    Gender = table.Column<string>(type: "varchar(10)", maxLength: 10, nullable: false),
+                    CharacterIndex = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,31 +82,7 @@ namespace AstroWheelAPI.Migrations
                 {
                     InventoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    TotalScore = table.Column<int>(type: "int", nullable: false),
-                    Material01 = table.Column<int>(type: "int", nullable: false),
-                    Material02 = table.Column<int>(type: "int", nullable: false),
-                    Material03 = table.Column<int>(type: "int", nullable: false),
-                    Material04 = table.Column<int>(type: "int", nullable: false),
-                    Material05 = table.Column<int>(type: "int", nullable: false),
-                    Material06 = table.Column<int>(type: "int", nullable: false),
-                    Material07 = table.Column<int>(type: "int", nullable: false),
-                    Material08 = table.Column<int>(type: "int", nullable: false),
-                    Material09 = table.Column<int>(type: "int", nullable: false),
-                    Material10 = table.Column<int>(type: "int", nullable: false),
-                    Material11 = table.Column<int>(type: "int", nullable: false),
-                    Material12 = table.Column<int>(type: "int", nullable: false),
-                    Material13 = table.Column<int>(type: "int", nullable: false),
-                    Material14 = table.Column<int>(type: "int", nullable: false),
-                    Material15 = table.Column<int>(type: "int", nullable: false),
-                    Material16 = table.Column<int>(type: "int", nullable: false),
-                    Material17 = table.Column<int>(type: "int", nullable: false),
-                    Material18 = table.Column<int>(type: "int", nullable: false),
-                    Material19 = table.Column<int>(type: "int", nullable: false),
-                    Material20 = table.Column<int>(type: "int", nullable: false),
-                    Material21 = table.Column<int>(type: "int", nullable: false),
-                    Material22 = table.Column<int>(type: "int", nullable: false),
-                    Material23 = table.Column<int>(type: "int", nullable: false),
-                    Material24 = table.Column<int>(type: "int", nullable: false)
+                    TotalScore = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -132,7 +109,8 @@ namespace AstroWheelAPI.Migrations
                 name: "Materials",
                 columns: table => new
                 {
-                    MaterialId = table.Column<string>(type: "varchar(255)", nullable: false),
+                    MaterialId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     WitchName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     EnglishName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
                     LatinName = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false)
@@ -147,14 +125,14 @@ namespace AstroWheelAPI.Migrations
                 name: "RecipeBooks",
                 columns: table => new
                 {
-                    RecipeId = table.Column<int>(type: "int", nullable: false)
+                    RecipeBookId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
-                    RecipeName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    RecipeBookName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     Acquired = table.Column<string>(type: "longtext", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecipeBooks", x => x.RecipeId);
+                    table.PrimaryKey("PK_RecipeBooks", x => x.RecipeBookId);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -270,6 +248,32 @@ namespace AstroWheelAPI.Migrations
                 .Annotation("MySQL:Charset", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "InventoryMaterials",
+                columns: table => new
+                {
+                    InventoryId = table.Column<int>(type: "int", nullable: false),
+                    MaterialId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InventoryMaterials", x => new { x.InventoryId, x.MaterialId });
+                    table.ForeignKey(
+                        name: "FK_InventoryMaterials_Inventories_InventoryId",
+                        column: x => x.InventoryId,
+                        principalTable: "Inventories",
+                        principalColumn: "InventoryId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_InventoryMaterials_Materials_MaterialId",
+                        column: x => x.MaterialId,
+                        principalTable: "Materials",
+                        principalColumn: "MaterialId",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Players",
                 columns: table => new
                 {
@@ -278,8 +282,9 @@ namespace AstroWheelAPI.Migrations
                     PlayerName = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     UserId = table.Column<string>(type: "varchar(255)", nullable: false),
                     CharacterId = table.Column<int>(type: "int", nullable: false),
-                    IslandId = table.Column<int>(type: "int", nullable: false),
-                    InventoryId = table.Column<int>(type: "int", nullable: false),
+                    IslandId = table.Column<int>(type: "int", nullable: true),
+                    InventoryId = table.Column<int>(type: "int", nullable: true),
+                    RecipeBookId = table.Column<int>(type: "int", nullable: true),
                     LastLogin = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
@@ -302,14 +307,17 @@ namespace AstroWheelAPI.Migrations
                         name: "FK_Players_Inventories_InventoryId",
                         column: x => x.InventoryId,
                         principalTable: "Inventories",
-                        principalColumn: "InventoryId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "InventoryId");
                     table.ForeignKey(
                         name: "FK_Players_Islands_IslandId",
                         column: x => x.IslandId,
                         principalTable: "Islands",
-                        principalColumn: "IslandId",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "IslandId");
+                    table.ForeignKey(
+                        name: "FK_Players_RecipeBooks_RecipeBookId",
+                        column: x => x.RecipeBookId,
+                        principalTable: "RecipeBooks",
+                        principalColumn: "RecipeBookId");
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
 
@@ -357,6 +365,11 @@ namespace AstroWheelAPI.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_InventoryMaterials_MaterialId",
+                table: "InventoryMaterials",
+                column: "MaterialId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Materials_EnglishName",
                 table: "Materials",
                 column: "EnglishName",
@@ -376,6 +389,12 @@ namespace AstroWheelAPI.Migrations
                 name: "IX_Players_IslandId",
                 table: "Players",
                 column: "IslandId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Players_RecipeBookId",
+                table: "Players",
+                column: "RecipeBookId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_UserId",
@@ -402,16 +421,16 @@ namespace AstroWheelAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Materials");
+                name: "InventoryMaterials");
 
             migrationBuilder.DropTable(
                 name: "Players");
 
             migrationBuilder.DropTable(
-                name: "RecipeBooks");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "Materials");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
@@ -424,6 +443,9 @@ namespace AstroWheelAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Islands");
+
+            migrationBuilder.DropTable(
+                name: "RecipeBooks");
         }
     }
 }

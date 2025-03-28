@@ -29,7 +29,7 @@ namespace AstroWheelAPI.Controllers
         public async Task<ActionResult<RecipeBook>> GetRecipeBook(int id)
         {
             var recipeBook = await _context.RecipeBooks
-                .FirstOrDefaultAsync(rb => rb.RecipeId == id);
+                .FirstOrDefaultAsync(rb => rb.RecipeBookId == id);
 
             if (recipeBook == null)
             {
@@ -46,13 +46,13 @@ namespace AstroWheelAPI.Controllers
             _context.RecipeBooks.Add(recipeBook);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetRecipeBook", new { id = recipeBook.RecipeId }, recipeBook);
+            return CreatedAtAction("GetRecipeBook", new { id = recipeBook.RecipeBookId }, recipeBook);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutRecipeBook(int id, RecipeBook recipeBook)
         {
-            if (id != recipeBook.RecipeId)
+            if (id != recipeBook.RecipeBookId)
             {
                 return BadRequest();
             }
@@ -95,7 +95,7 @@ namespace AstroWheelAPI.Controllers
 
         private bool RecipeBookExists(int id)
         {
-            return _context.RecipeBooks.Any(e => e.RecipeId == id);
+            return _context.RecipeBooks.Any(e => e.RecipeBookId == id);
         }
     }
 }

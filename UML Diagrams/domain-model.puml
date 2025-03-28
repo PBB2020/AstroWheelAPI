@@ -120,7 +120,7 @@ class Player {
 }
 
 class RecipeBook {
-  - RecipeId : int
+  - RecipeBookId : int
   - RecipeName : string
   - Acquired : string
 }

@@ -5,10 +5,10 @@ namespace AstroWheelAPI.Models
     public class RecipeBook
     {
         [Key]
-        public int RecipeId { get; set; }
+        public int RecipeBookId{ get; set; }
         [Required]
         [StringLength(255)]
-        public string RecipeName { get; set; } = string.Empty;
+        public string RecipeBookName { get; set; } = string.Empty;
         [Required]
         public string Acquired { get; set; } = string.Empty;
     }

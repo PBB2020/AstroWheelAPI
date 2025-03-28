@@ -27,7 +27,13 @@ namespace AstroWheelAPI.Context
 
             // RecipeBook elsődleges kulcsának beállítása
             builder.Entity<RecipeBook>()
-                .HasKey(r => r.RecipeId);
+                .HasKey(r => r.RecipeBookId);
+
+            // Kapcsolat a Player és RecipeBook között (1 Player → 1 RecipeBook)
+            builder.Entity<Player>()
+                .HasOne(p => p.RecipeBook)
+                .WithOne() 
+                .HasForeignKey<Player>(p => p.RecipeBookId); // Külső kulcs a Player-ben
 
             // Kapcsolótábla konfigurálása
             builder.Entity<InventoryMaterial>()
@@ -46,8 +52,8 @@ namespace AstroWheelAPI.Context
             // Kötelező 1:1 kapcsolat a Player és a Character között
             builder.Entity<Player>()
                 .HasOne(p => p.Character)
-                .WithOne()
-                .HasForeignKey<Player>(p => p.CharacterId)
+                .WithMany()
+                .HasForeignKey(p => p.CharacterId)
                 .IsRequired(); // Kötelező kapcsolat
         }
     }
