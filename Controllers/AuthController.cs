@@ -77,6 +77,7 @@ namespace AstroWheelAPI.Controllers
                         CharacterId = character.CharacterId,
                         Character = character, // Módosítás: Character navigációs tulajdonság beállítása
                         InventoryId = inventory.InventoryId,
+                        Inventory = inventory,
                         CreatedAt = DateTime.UtcNow
                     };
 

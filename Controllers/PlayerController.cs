@@ -208,13 +208,13 @@ namespace AstroWheelAPI.Controllers
                 return NotFound();
             }
 
-            if (!player.InventoryId.HasValue)
+            if (player.InventoryId == 0)
             {
                 return NotFound("Inventory not found.");
             }
 
             var inventoryMaterials = await _context.InventoryMaterials
-                .Where(im => im.InventoryId == player.InventoryId.Value)
+                .Where(im => im.InventoryId == player.InventoryId)
                 .ToListAsync();
 
             var playerMaterials = inventoryMaterials.Select(im => new PlayerMaterialDTO

@@ -7,7 +7,7 @@
         public string UserId { get; set; } = string.Empty;
         public int CharacterId { get; set; }
         public int? IslandId { get; set; }
-        public int? InventoryId { get; set; }
+        public int InventoryId { get; set; }
         public int? RecipeBookId { get; set; }
         public int TotalScore { get; set; }
         public DateTime? LastLogin { get; set; }
