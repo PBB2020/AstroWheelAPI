@@ -4,7 +4,6 @@ WORKDIR /src
 
 # 1. Főprojekt és tesztprojekt fájljainak másolása
 COPY ["AstroWheelAPI/AstroWheelAPI.csproj", "AstroWheelAPI/"]
-COPY ["Test.AstroWheelApi/Test.AstroWheelApi.csproj", "Test.AstroWheelApi/"]
 RUN dotnet restore "AstroWheelAPI/AstroWheelAPI.csproj"  # Csak a főprojekt restore
 
 # 2. Összes fájl másolása (beleértve a tesztprojektet)
