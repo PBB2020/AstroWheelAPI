@@ -131,9 +131,9 @@ class RecipeBook {
 
 ApplicationUser "1" --> "0..*" Player : has
 Player "1" --> "1" Character : uses
-Player "1" --> "1" Island : located on
+Player "1" --> "0..1" Island : located on
 Player "1" --> "1" Inventory : owns
-Player "1" --> "1" RecipeBook : possesses
+Player "1" --> "0..1" RecipeBook : possesses
 Island "1" --> "0..*" Player : contains
 Inventory "1" --> "0..*" InventoryMaterial : contains
 Material "1" --> "0..*" InventoryMaterial : referenced in
