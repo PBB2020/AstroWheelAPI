@@ -11,7 +11,7 @@ RUN dotnet restore "AstroWheelAPI.csproj"
 
 # 3. Publikálás explicit a főprojektre
 WORKDIR "/src/AstroWheelAPI"
-RUN dotnet publish -c Release -o /app
+RUN dotnet publish "../AstroWheelAPI.csproj" -c Release -o /app # A projektfájl helyére mutat
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
