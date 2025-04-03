@@ -2,12 +2,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Csak a főprojekt másolása és restore
-COPY ["AstroWheelAPI/AstroWheelAPI.csproj", "AstroWheelAPI/"]
-RUN dotnet restore "AstroWheelAPI/AstroWheelAPI.csproj"
-
-# 2. Összes fájl másolása (a .dockerignore kizárja a tesztprojektet)
+# 1. Összes fájl másolása
 COPY . .
+
+# 2. Csak a főprojekt másolása és restore
+COPY ["AstroWheelAPI/AstroWheelAPI.csproj", "./"]
+RUN dotnet restore "AstroWheelAPI.csproj"
 
 # 3. Publikálás explicit a főprojektre
 WORKDIR "/src/AstroWheelAPI"
