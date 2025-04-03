@@ -6,7 +6,7 @@ WORKDIR /src
 COPY . .
 
 # 2. Csak a főprojekt másolása és restore
-COPY ["AstroWheelAPI/AstroWheelAPI.csproj", "./"]
+COPY ["AstroWheelAPI.csproj", "./"]
 RUN dotnet restore "AstroWheelAPI.csproj"
 
 # 3. Publikálás explicit a főprojektre
