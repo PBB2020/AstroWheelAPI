@@ -132,7 +132,14 @@ namespace AstroWheelAPI.Controllers
         [Authorize]
         public async Task<ActionResult<PlayerDTO>> GetMyPlayer()
         {
+            // Hitelesítés ellenőrzése manuálisan
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();// Visszatérés, ha nincs userId
+            }
+
+            // Csak hitelesített felhasználóknak: adatbázis-lekérdezés
             var player = await _context.Players
                 .Include(p => p.Inventory)
                 .Include(p => p.Character)
