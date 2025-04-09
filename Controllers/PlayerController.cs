@@ -63,7 +63,7 @@ namespace AstroWheelAPI.Controllers
                     TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
                     LastLogin = player.LastLogin,
                     CreatedAt = player.CreatedAt,
-                    CharacterName = player.Character?.AstroSign,
+                    CharacterIndex = player.Character?.CharacterIndex,
                     IslandName = player.Island?.IslandName,
                     RecipeBookId = player.RecipeBookId,
                     Materials = playerMaterialDTOs
@@ -119,7 +119,7 @@ namespace AstroWheelAPI.Controllers
                TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
                LastLogin = player.LastLogin,
                CreatedAt = player.CreatedAt,
-               CharacterName = player.Character?.AstroSign,
+               CharacterIndex = player.Character?.CharacterIndex,
                IslandName = player.Island?.IslandName,
                RecipeBookId = player.RecipeBookId,
                Materials = playerMaterialDTOs
@@ -191,7 +191,7 @@ namespace AstroWheelAPI.Controllers
                 TotalScore = player.Inventory != null ? player.Inventory.TotalScore : 0,
                 LastLogin = player.LastLogin,
                 CreatedAt = player.CreatedAt,
-                CharacterName = player.Character?.AstroSign,
+                CharacterIndex = player.Character?.CharacterIndex,
                 IslandName = player.Island?.IslandName,
                 RecipeBookId = player.RecipeBookId,
                 Materials = playerMaterialDTOs // Ez a sor a lényeg

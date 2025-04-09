@@ -12,7 +12,7 @@
         public int TotalScore { get; set; }
         public DateTime? LastLogin { get; set; }
         public DateTime CreatedAt  { get; set; }    
-        public string? CharacterName { get; set; }
+        public int? CharacterIndex { get; set; }
         public string? IslandName { get; set; }
         public List<PlayerMaterialDTO>? Materials { get; set; } // Hozzáadott sor
     }
