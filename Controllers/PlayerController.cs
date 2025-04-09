@@ -194,7 +194,7 @@ namespace AstroWheelAPI.Controllers
                 CharacterIndex = player.Character?.CharacterIndex,
                 IslandName = player.Island?.IslandName,
                 RecipeBookId = player.RecipeBookId,
-                Materials = playerMaterialDTOs // Ez a sor a lényeg
+                Materials = playerMaterialDTOs
             });
         }
 
@@ -237,23 +237,8 @@ namespace AstroWheelAPI.Controllers
             return playerMaterials;
         }
 
-        /*[HttpPost]
-        [Authorize(Roles = "Admin")]// Csak az adminok hozhatnak létre játékost, egyébként regisztráció során létrejön a Player
-        public async Task<ActionResult<Player>> CreatePlayer(Player player)
-        {
-         // Ellenőrizzük, hogy a megadott UserId létezik-e
-        var user = await _context.Users.FindAsync(player.UserId);
-        if (user == null)
-        {
-         return BadRequest("Invalid UserId");
-        }
-
-            context.Players.Add(player);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetPlayer), new { id = player.PlayerId }, player);
-        }*/
-
+        /*[HttpPost] -  regisztráció során létrejön a Player */
+       
         [HttpPut("{id}")]
 
         public async Task<IActionResult> UpdatePlayer(int id, PlayerPutDTO playerDTO)

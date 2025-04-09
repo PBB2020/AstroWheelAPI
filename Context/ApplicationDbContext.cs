@@ -35,6 +35,12 @@ namespace AstroWheelAPI.Context
                 .WithOne() 
                 .HasForeignKey<Player>(p => p.RecipeBookId); // Külső kulcs a Player-ben
 
+            // Kapacsolat a Player és Island között (1:n - egy Island-hoz több Player)
+            builder.Entity<Player>()
+                .HasOne(p => p.Island)
+                .WithMany(i => i.Players)
+                .HasForeignKey(p => p.IslandId);
+
             // Kapcsolótábla konfigurálása
             builder.Entity<InventoryMaterial>()
                 .HasKey(im => new { im.InventoryId, im.MaterialId });

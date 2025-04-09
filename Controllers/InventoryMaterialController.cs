@@ -12,12 +12,12 @@ namespace AstroWheelAPI.Controllers
     public class InventoryMaterialController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<InventoryMaterialController> _logger; // Add this line
+        private readonly ILogger<InventoryMaterialController> _logger; 
 
-        public InventoryMaterialController(ApplicationDbContext context, ILogger<InventoryMaterialController> logger) // Modify the constructor
+        public InventoryMaterialController(ApplicationDbContext context, ILogger<InventoryMaterialController> logger) // Konstruktor módosítása
         {
             _context = context;
-            _logger = logger; // Initialize the logger
+            _logger = logger; // Logger inicializálása
         }
 
         [HttpGet]

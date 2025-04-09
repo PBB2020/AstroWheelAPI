@@ -12,6 +12,6 @@ namespace AstroWheelAPI.Models
         [Required]
         [StringLength(10)]
         public string Gender { get; set; } = string.Empty;
-        public int CharacterIndex { get; set; } // Hozzáadva
+        public int CharacterIndex { get; set; }
     }
 }

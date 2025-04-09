@@ -24,6 +24,7 @@ namespace AstroWheelAPI.Models
         [ForeignKey("Island")]
         public int?  IslandId { get; set; }
         public Island? Island { get; set; }
+        [Required]
         [ForeignKey("Inventory")]
         public int InventoryId { get; set; }
         public required Inventory Inventory { get; set; }
