@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace AstroWheelAPI.Models
 {
+    [Index(nameof(CharacterIndex), IsUnique = true)]
     public class Character
     {
         [Key]
