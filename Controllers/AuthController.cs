@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -18,14 +17,14 @@ namespace AstroWheelAPI.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _context; //Hozzáadva
-        private readonly ILogger<AuthController> _logger; //ILogger Hozzáadva
+        private readonly ApplicationDbContext _context; 
+        private readonly ILogger<AuthController> _logger; 
         public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ApplicationDbContext context, ILogger<AuthController> logger)//Módosítva
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
-            _context = context; //Hozzáadva
+            _context = context; 
             _logger = logger;
         }
 
@@ -34,7 +33,7 @@ namespace AstroWheelAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Invalid model state during registration: {ModelState}", ModelState); // Loggolás
+                _logger.LogWarning("Invalid model state during registration: {ModelState}", ModelState); 
                 return BadRequest(ModelState);
             }
 
@@ -58,7 +57,7 @@ namespace AstroWheelAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating Inventory during registration."); // Loggolás
+                _logger.LogError(ex, "Error creating Inventory during registration."); 
                 return StatusCode(500, "Error creating Inventory: " + ex.Message);
             }
 
@@ -75,7 +74,7 @@ namespace AstroWheelAPI.Controllers
                         UserId = user.Id,
                         PlayerName = model.PlayerName,
                         CharacterId = character.CharacterId,
-                        Character = character, // Módosítás: Character navigációs tulajdonság beállítása
+                        Character = character, 
                         InventoryId = inventory.InventoryId,
                         Inventory = inventory,
                         CreatedAt = DateTime.UtcNow
@@ -84,17 +83,17 @@ namespace AstroWheelAPI.Controllers
                     _context.Players.Add(player);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("User and Player registered successfully: {UserId}", user.Id); // Loggolás
+                    _logger.LogInformation("User and Player registered successfully: {UserId}", user.Id); 
                     return Ok("User and Player are registered successfully!");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error creating Player during registration."); // Loggolás
+                    _logger.LogError(ex, "Error creating Player during registration."); 
                     return StatusCode(500, "Error creating Player: " + ex.Message);
                 }
             }
 
-            _logger.LogError("User registration failed: {Errors}", result.Errors); // Loggolás
+            _logger.LogError("User registration failed: {Errors}", result.Errors); 
             return BadRequest(result.Errors);
         }
 

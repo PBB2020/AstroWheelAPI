@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AstroWheelAPI.Context;
 using AstroWheelAPI.DTOs;
-using System.Collections.Concurrent;
 
 namespace AstroWheelAPI.Controllers
 {
@@ -36,8 +35,8 @@ namespace AstroWheelAPI.Controllers
                     PlayerId = player.PlayerId,
                     PlayerName = player.PlayerName
                 })
-                .OrderByDescending(dto => dto.TotalScore) //Hozzáadva: rendezés TotalScore szerint csökkenő sorrendben
-                .ThenBy(dto => dto.PlayerName) //Hozzáadva: PlayerName szerinti rendezés is
+                .OrderByDescending(dto => dto.TotalScore) //Rendezés TotalScore szerint csökkenő sorrendben
+                .ThenBy(dto => dto.PlayerName) //PlayerName szerinti rendezés is
                 .ToList();
 
             return Ok(inventoryDTOs);
@@ -60,7 +59,7 @@ namespace AstroWheelAPI.Controllers
 
             if (player ==  null)
             {
-                return NotFound(); // Ha nincs játékos az adott InventoryId-val
+                return NotFound(); //Ha nincs játékos az adott InventoryId-val
             }
 
             var inventoryDTO = new InventoryWithPlayerDTO
@@ -105,7 +104,7 @@ namespace AstroWheelAPI.Controllers
         {
             if (id != inventoryDTO.InventoryId)
             {
-                return BadRequest("InventoryId mismatch"); // Részletesebb hibaüzenet
+                return BadRequest("InventoryId mismatch"); 
             }
 
             var inventory = await _context.Inventories.FindAsync(id);
@@ -125,7 +124,7 @@ namespace AstroWheelAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Inventories.Any(e => e.InventoryId == id)) // Hatékonyabb ellenőrzés
+                if (!_context.Inventories.Any(e => e.InventoryId == id)) //Hatékonyabb ellenőrzés
                 {
                     return NotFound();
                 }

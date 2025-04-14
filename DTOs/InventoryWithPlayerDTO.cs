@@ -1,6 +1,4 @@
-﻿using AstroWheelAPI.Models;
-
-namespace AstroWheelAPI.DTOs
+﻿namespace AstroWheelAPI.DTOs
 {
     public class InventoryWithPlayerDTO
     {

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AstroWheelAPI.Context;
 using AstroWheelAPI.DTOs;
-using Microsoft.Extensions.Logging;
 
 namespace AstroWheelAPI.Controllers
 {
@@ -14,10 +13,10 @@ namespace AstroWheelAPI.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<InventoryMaterialController> _logger; 
 
-        public InventoryMaterialController(ApplicationDbContext context, ILogger<InventoryMaterialController> logger) // Konstruktor módosítása
+        public InventoryMaterialController(ApplicationDbContext context, ILogger<InventoryMaterialController> logger)
         {
             _context = context;
-            _logger = logger; // Logger inicializálása
+            _logger = logger; 
         }
 
         [HttpGet]

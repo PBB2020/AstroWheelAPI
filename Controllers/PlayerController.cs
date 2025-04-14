@@ -1,6 +1,5 @@
 ﻿using AstroWheelAPI.Context;
 using AstroWheelAPI.DTOs;
-using AstroWheelAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
